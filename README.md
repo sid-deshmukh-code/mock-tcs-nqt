@@ -2,7 +2,7 @@
 
 A free, offline-capable mock test for TCS NQT preparation — 309 PYQ-style questions across 31 topics, with instant explanations and automatic progress saving.
 
-**[▶ Open Mock Test](https://YOUR-USERNAME.github.io/YOUR-REPO-NAME/)** ← update after hosting
+**[▶ Open Mock Test](https://sid-deshmukh-code.github.io/mock-tcs-nqt/)** ← update after hosting
 
 ---
 
