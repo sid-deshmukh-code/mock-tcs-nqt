@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TCS NQT Full Mock Test — 309 Questions</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:#0f1117;color:#e8eaed;min-height:100vh}
+  :root{--green:#00c896;--green-dim:#00a07a;--red:#ff5370;--amber:#ffb347;--blue:#4fc3f7;--bg1:#0f1117;--bg2:#1a1d27;--bg3:#242736;--border:#2e3245;--text1:#e8eaed;--text2:#9aa0b4;--text3:#5c6380}
+
+  /* === SCREEN MANAGER === */
+  .screen{display:none}
+  .screen.active{display:block}
+
+  /* === WELCOME SCREEN === */
+  #screen-welcome{background:var(--bg1);min-height:100vh;display:none;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center}
+  #screen-welcome.active{display:flex}
+  .logo{font-size:14px;letter-spacing:3px;color:var(--green);margin-bottom:2rem;text-transform:uppercase}
+  .welcome-title{font-size:clamp(28px,5vw,48px);font-weight:700;line-height:1.2;margin-bottom:1rem}
+  .welcome-title span{color:var(--green)}
+  .welcome-sub{color:var(--text2);font-size:16px;max-width:500px;line-height:1.7;margin-bottom:2.5rem}
+  .stats-row{display:flex;gap:2rem;margin-bottom:3rem;flex-wrap:wrap;justify-content:center}
+  .stat-pill{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 24px;text-align:center}
+  .stat-pill .n{font-size:28px;font-weight:700;color:var(--green)}
+  .stat-pill .l{font-size:12px;color:var(--text2);margin-top:4px}
+  .filter-row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:2rem}
+  .filter-btn{padding:8px 18px;border:1px solid var(--border);border-radius:20px;background:transparent;color:var(--text2);font-size:13px;cursor:pointer;transition:all .2s}
+  .filter-btn:hover,.filter-btn.sel{background:var(--green);color:#000;border-color:var(--green);font-weight:600}
+  .start-btn{padding:16px 48px;background:var(--green);color:#000;font-size:16px;font-weight:700;border:none;border-radius:12px;cursor:pointer;letter-spacing:.5px;transition:all .2s;margin-bottom:1rem}
+  .start-btn:hover{background:var(--green-dim);transform:translateY(-2px)}
+  .count-note{font-size:13px;color:var(--text3)}
+
+  /* === TEST SCREEN === */
+  #screen-test{background:var(--bg1);min-height:100vh;display:none;flex-direction:column}
+  #screen-test.active{display:flex}
+
+  .topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
+  .tb-brand{font-size:13px;font-weight:700;color:var(--green);letter-spacing:1px;flex-shrink:0}
+  .tb-progress-wrap{flex:1;min-width:120px}
+  .tb-progress-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+  .tb-progress-fill{height:100%;background:var(--green);border-radius:2px;transition:width .3s}
+  .tb-progress-text{font-size:11px;color:var(--text2);margin-top:4px}
+  .tb-timer{font-size:15px;font-weight:700;color:var(--amber);font-variant-numeric:tabular-nums;flex-shrink:0}
+  .tb-timer.warning{color:var(--red);animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  .tb-score{font-size:13px;color:var(--text2);flex-shrink:0}
+  .tb-score span{color:var(--green);font-weight:700}
+
+  .test-body{flex:1;display:flex;max-width:860px;width:100%;margin:0 auto;padding:24px 16px;gap:20px}
+
+  .q-panel{flex:1;min-width:0}
+  .q-section-tag{font-size:11px;letter-spacing:2px;color:var(--green);text-transform:uppercase;margin-bottom:8px}
+  .q-number{font-size:13px;color:var(--text3);margin-bottom:12px}
+  .q-text{font-size:17px;line-height:1.65;color:var(--text1);margin-bottom:24px;font-weight:400}
+  .options{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+  .opt{display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:all .15s;background:var(--bg2)}
+  .opt:hover{border-color:var(--green);background:rgba(0,200,150,.05)}
+  .opt.selected{border-color:var(--green);background:rgba(0,200,150,.1)}
+  .opt.correct{border-color:var(--green)!important;background:rgba(0,200,150,.15)!important}
+  .opt.wrong{border-color:var(--red)!important;background:rgba(255,83,112,.1)!important}
+  .opt.reveal-correct{border-color:var(--green)!important;background:rgba(0,200,150,.08)!important}
+  .opt-key{width:28px;height:28px;border-radius:6px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:var(--text2);flex-shrink:0;border:1px solid var(--border);margin-top:1px;transition:all .15s}
+  .opt.selected .opt-key{background:var(--green);color:#000;border-color:var(--green)}
+  .opt.correct .opt-key{background:var(--green);color:#000;border-color:var(--green)}
+  .opt.wrong .opt-key{background:var(--red);color:#fff;border-color:var(--red)}
+  .opt-text{font-size:15px;line-height:1.5;color:var(--text1);flex:1}
+
+  .explanation{background:var(--bg3);border-left:3px solid var(--green);border-radius:0 8px 8px 0;padding:12px 16px;font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:20px;display:none}
+  .explanation.show{display:block}
+  .explanation strong{color:var(--green)}
+
+  .nav-row{display:flex;gap:10px;align-items:center}
+  .nav-btn{padding:10px 24px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--text2);font-size:14px;cursor:pointer;transition:all .15s}
+  .nav-btn:hover{background:var(--bg3);color:var(--text1)}
+  .nav-btn.primary{background:var(--green);color:#000;border-color:var(--green);font-weight:600}
+  .nav-btn.primary:hover{background:var(--green-dim)}
+  .nav-btn:disabled{opacity:.4;cursor:not-allowed}
+  .skip-link{font-size:13px;color:var(--text3);cursor:pointer;text-decoration:underline;margin-left:auto}
+  .skip-link:hover{color:var(--text2)}
+
+  /* Sidebar: question map */
+  .q-map{width:220px;flex-shrink:0}
+  .q-map-title{font-size:12px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px}
+  .q-map-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin-bottom:16px}
+  .qm-dot{width:22px;height:22px;border-radius:4px;background:var(--bg3);border:1px solid var(--border);cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center;color:var(--text3);transition:all .15s}
+  .qm-dot:hover{border-color:var(--text2)}
+  .qm-dot.answered{background:rgba(0,200,150,.2);border-color:var(--green);color:var(--green)}
+  .qm-dot.current{background:var(--green);color:#000;border-color:var(--green)}
+  .qm-dot.skipped{background:rgba(255,179,71,.1);border-color:var(--amber);color:var(--amber)}
+  .legend{display:flex;flex-direction:column;gap:6px}
+  .legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2)}
+  .leg-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+  .submit-all-btn{width:100%;margin-top:16px;padding:12px;background:var(--red);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;transition:all .15s}
+  .submit-all-btn:hover{opacity:.85}
+
+  /* === RESULTS SCREEN === */
+  #screen-results{background:var(--bg1);min-height:100vh;display:none;flex-direction:column;align-items:center;padding:3rem 1rem}
+  #screen-results.active{display:flex}
+  .result-title{font-size:32px;font-weight:700;margin-bottom:8px;text-align:center}
+  .result-sub{color:var(--text2);font-size:15px;margin-bottom:2rem;text-align:center}
+  .score-ring{width:150px;height:150px;position:relative;margin:0 auto 2rem}
+  .score-ring svg{transform:rotate(-90deg)}
+  .score-ring .score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column}
+  .score-ring .pct{font-size:30px;font-weight:700;color:var(--green)}
+  .score-ring .pct-lbl{font-size:12px;color:var(--text2)}
+  .result-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;width:100%;max-width:700px;margin-bottom:2rem}
+  .r-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center}
+  .r-card .rv{font-size:26px;font-weight:700}
+  .r-card .rl{font-size:12px;color:var(--text2);margin-top:4px}
+  .r-card.green .rv{color:var(--green)}
+  .r-card.red .rv{color:var(--red)}
+  .r-card.amber .rv{color:var(--amber)}
+  .r-card.blue .rv{color:var(--blue)}
+
+  .section-breakdown{width:100%;max-width:700px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:2rem}
+  .sb-title{font-size:14px;font-weight:600;margin-bottom:14px;color:var(--text1)}
+  .sb-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+  .sb-name{font-size:12px;color:var(--text2);width:200px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sb-bar-wrap{flex:1;background:var(--bg3);border-radius:4px;height:6px;overflow:hidden}
+  .sb-bar{height:100%;background:var(--green);border-radius:4px;transition:width .5s}
+  .sb-frac{font-size:11px;color:var(--text2);min-width:40px;text-align:right}
+
+  .result-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:2rem}
+  .ra-btn{padding:12px 28px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+  .ra-btn.primary{background:var(--green);color:#000}
+  .ra-btn.secondary{background:var(--bg2);border:1px solid var(--border);color:var(--text1)}
+  .ra-btn:hover{opacity:.85}
+
+  .review-section{width:100%;max-width:700px}
+  .review-title{font-size:16px;font-weight:600;margin-bottom:16px;color:var(--text1)}
+  .review-q{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;margin-bottom:12px}
+  .rq-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+  .rq-badge{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:600;flex-shrink:0}
+  .rq-badge.correct{background:rgba(0,200,150,.2);color:var(--green)}
+  .rq-badge.wrong{background:rgba(255,83,112,.2);color:var(--red)}
+  .rq-badge.skipped{background:rgba(255,179,71,.2);color:var(--amber)}
+  .rq-text{font-size:14px;color:var(--text1);line-height:1.5}
+  .rq-answer{font-size:13px;color:var(--text2);margin-top:8px}
+  .rq-answer .correct-a{color:var(--green);font-weight:600}
+  .rq-answer .wrong-a{color:var(--red);text-decoration:line-through}
+  .rq-expl{font-size:13px;color:var(--text3);margin-top:6px;line-height:1.5;border-top:1px solid var(--border);padding-top:8px}
+
+  @media(max-width:660px){
+    .test-body{flex-direction:column-reverse}
+    .q-map{width:100%;display:none}
+    .q-map.mobile-show{display:block}
+  }
+</style>
+</head>
+<body>
+
+<!-- CONTINUE SESSION MODAL -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:32px;max-width:420px;width:90%;text-align:center">
+    <div style="font-size:28px;margin-bottom:12px">🔄</div>
+    <h2 style="font-size:20px;font-weight:700;margin-bottom:8px">Resume Previous Session?</h2>
+    <p style="font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:8px" id="modal-saved-info"></p>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:24px">Your progress was saved on this device.</p>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+      <button onclick="resumeSession()" style="padding:12px 28px;background:var(--green);color:#000;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer">Resume →</button>
+      <button onclick="discardAndStart()" style="padding:12px 28px;background:var(--bg3);color:var(--text1);border:1px solid var(--border);border-radius:8px;font-size:14px;cursor:pointer">Start Fresh</button>
+    </div>
+  </div>
+</div>
+
+<!-- WELCOME -->
+<div id="screen-welcome" class="screen active">
+  <div class="logo">TCS NQT Prep</div>
+  <h1 class="welcome-title">Full Mock Test<br><span>309 PYQ Questions</span></h1>
+
+  <!-- Info banner -->
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:16px 20px;max-width:560px;width:100%;margin-bottom:20px;text-align:left">
+    <div style="font-size:12px;font-weight:700;letter-spacing:1px;color:var(--green);margin-bottom:10px;text-transform:uppercase">ℹ️ About This Mock Test</div>
+    <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:7px">
+      <li style="font-size:13px;color:var(--text2);display:flex;gap:8px"><span style="color:var(--green);flex-shrink:0">✓</span>Unofficial TCS NQT practice test — not affiliated with TCS</li>
+      <li style="font-size:13px;color:var(--text2);display:flex;gap:8px"><span style="color:var(--green);flex-shrink:0">✓</span>309 PYQ-style questions across 31 topics with instant explanations</li>
+      <li style="font-size:13px;color:var(--text2);display:flex;gap:8px"><span style="color:var(--amber);flex-shrink:0">💾</span>Your progress is <strong style="color:var(--text1)">saved automatically</strong> to this device (localStorage). No data leaves your browser.</li>
+      <li style="font-size:13px;color:var(--text2);display:flex;gap:8px"><span style="color:var(--amber);flex-shrink:0">🔒</span>No account, no server — 100% offline capable after first load. Safe to host on GitHub Pages.</li>
+    </ul>
+  </div>
+
+  <p class="welcome-sub">Covering Quantitative Aptitude, Logical Reasoning, Verbal Ability, Programming, DSA, Networking, OS, Databases, and more — with one-liner explanations after each answer.</p>
+  <div class="stats-row">
+    <div class="stat-pill"><div class="n" id="stat-total">309</div><div class="l">Questions</div></div>
+    <div class="stat-pill"><div class="n">31</div><div class="l">Topics</div></div>
+    <div class="stat-pill"><div class="n" id="stat-time">90</div><div class="l">Min Timer</div></div>
+  </div>
+  <div style="margin-bottom:12px;font-size:13px;color:var(--text2)">Filter by topic (optional):</div>
+  <div class="filter-row" id="filter-row"></div>
+  <button class="start-btn" onclick="startTest()">Start Test →</button>
+  <div class="count-note" id="count-note">All 309 questions selected</div>
+  <div style="margin-top:14px;font-size:11px;color:var(--text3)">Progress auto-saves every question • <span style="cursor:pointer;text-decoration:underline" onclick="clearAllData()">Clear saved data</span></div>
+</div>
+
+<!-- TEST -->
+<div id="screen-test" class="screen">
+  <div class="topbar">
+    <div class="tb-brand">TCS NQT</div>
+    <div class="tb-progress-wrap">
+      <div class="tb-progress-bar"><div class="tb-progress-fill" id="progress-fill"></div></div>
+      <div class="tb-progress-text" id="progress-text"></div>
+    </div>
+    <div class="tb-timer" id="timer-display">90:00</div>
+    <div class="tb-score">Score: <span id="score-live">0</span></div>
+  </div>
+  <div class="test-body">
+    <div class="q-panel">
+      <div class="q-section-tag" id="q-section"></div>
+      <div class="q-number" id="q-number"></div>
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="options-container"></div>
+      <div class="explanation" id="explanation"></div>
+      <div class="nav-row">
+        <button class="nav-btn" id="btn-prev" onclick="prevQ()">← Prev</button>
+        <button class="nav-btn primary" id="btn-next" onclick="nextQ()">Next →</button>
+        <span class="skip-link" onclick="skipQ()">Skip</span>
+      </div>
+    </div>
+    <div class="q-map" id="q-map">
+      <div class="q-map-title">Questions</div>
+      <div class="q-map-grid" id="map-grid"></div>
+      <div class="legend">
+        <div class="legend-item"><div class="leg-dot" style="background:rgba(0,200,150,.3);border:1px solid var(--green)"></div>Answered</div>
+        <div class="legend-item"><div class="leg-dot" style="background:var(--bg3);border:1px solid var(--border)"></div>Not visited</div>
+        <div class="legend-item"><div class="leg-dot" style="background:rgba(255,179,71,.1);border:1px solid var(--amber)"></div>Skipped</div>
+      </div>
+      <button class="submit-all-btn" onclick="confirmSubmit()">Submit Test</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="screen-results" class="screen">
+  <div class="result-title" id="result-title">Test Complete!</div>
+  <div class="result-sub" id="result-sub"></div>
+  <div class="score-ring">
+    <svg width="150" height="150" viewBox="0 0 150 150">
+      <circle cx="75" cy="75" r="60" fill="none" stroke="#2e3245" stroke-width="12"/>
+      <circle cx="75" cy="75" r="60" fill="none" stroke="#00c896" stroke-width="12"
+              stroke-dasharray="376.99" id="score-arc" stroke-linecap="round"/>
+    </svg>
+    <div class="score-num"><div class="pct" id="pct-display">0%</div><div class="pct-lbl">Score</div></div>
+  </div>
+  <div class="result-grid">
+    <div class="r-card green"><div class="rv" id="r-correct">0</div><div class="rl">Correct</div></div>
+    <div class="r-card red"><div class="rv" id="r-wrong">0</div><div class="rl">Wrong</div></div>
+    <div class="r-card amber"><div class="rv" id="r-skipped">0</div><div class="rl">Skipped</div></div>
+    <div class="r-card blue"><div class="rv" id="r-time">0:00</div><div class="rl">Time Taken</div></div>
+  </div>
+  <div class="section-breakdown" id="section-breakdown"></div>
+  <div class="result-actions">
+    <button class="ra-btn primary" onclick="retakeTest()">Retake Test</button>
+    <button class="ra-btn secondary" onclick="goHome()">Change Filter</button>
+    <button class="ra-btn secondary" onclick="toggleReview()">Review Answers ↓</button>
+  </div>
+  <div class="review-section" id="review-section" style="display:none">
+    <div class="review-title">Answer Review</div>
+    <div id="review-list"></div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  PERSISTENT STORAGE  (localStorage — stays on user's device)
+// ============================================================
+const STORAGE_KEY = 'tcs_nqt_session_v1';
+
+function saveSession() {
+  try {
+    const payload = {
+      questions: questions.map(q => ALL_QUESTIONS.indexOf(q)), // store indices
+      current,
+      answers,
+      skipped: [...skipped],
+      secondsLeft,
+      startTime,
+      selectedFilter,
+      savedAt: Date.now()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  } catch(e) { /* storage full or unavailable */ }
+}
+
+function loadSession() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const p = JSON.parse(raw);
+    // validate
+    if (!p.questions || !Array.isArray(p.questions) || p.questions.length === 0) return null;
+    return p;
+  } catch(e) { return null; }
+}
+
+function clearSession() {
+  try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+}
+
+function clearAllData() {
+  if (!confirm('Clear all saved progress from this device?')) return;
+  clearSession();
+  alert('Saved data cleared.');
+}
+
+function showModal(saved) {
+  const elapsed = Math.round((Date.now() - saved.savedAt) / 60000);
+  const timeStr = elapsed < 1 ? 'just now' : elapsed < 60 ? `${elapsed} min ago` : `${Math.round(elapsed/60)}h ago`;
+  const answeredCount = Object.keys(saved.answers).length;
+  const totalQ = saved.questions.length;
+  document.getElementById('modal-saved-info').textContent =
+    `${answeredCount} of ${totalQ} questions answered — saved ${timeStr}`;
+  const overlay = document.getElementById('modal-overlay');
+  overlay.style.display = 'flex';
+}
+
+function resumeSession() {
+  const saved = loadSession();
+  if (!saved) return;
+  document.getElementById('modal-overlay').style.display = 'none';
+
+  questions = saved.questions.map(i => ALL_QUESTIONS[i]);
+  current = saved.current;
+  answers = saved.answers;
+  skipped = new Set(saved.skipped);
+  secondsLeft = Math.max(0, saved.secondsLeft);
+  startTime = Date.now() - ((saved.questions.length * 18 * 1000) - secondsLeft * 1000); // recompute
+  selectedFilter = saved.selectedFilter;
+
+  switchScreen('screen-test');
+  buildMap();
+  renderQ();
+  startTimer();
+}
+
+function discardAndStart() {
+  clearSession();
+  document.getElementById('modal-overlay').style.display = 'none';
+}
+
+// ============================================================
+//  MAIN
+// ============================================================
+const ALL_QUESTIONS = [{"q":"If a train travels 120 km in 2 hours, what is its speed?","opts":{"A":"50 km/h","B":"60 km/h","C":"70 km/h","D":"80 km/h"},"ans":"B","sol":"Speed = Distance/Time = 120/2 = 60 km/h","sec":"QUANTITATIVE APTITUDE"},{"q":"What is 25% of 400?","opts":{"A":"50","B":"75","C":"100","D":"125"},"ans":"C","sol":"25% of 400 = (25/100) × 400 = 100","sec":"QUANTITATIVE APTITUDE"},{"q":"If 5x + 3 = 28, then x = ?","opts":{"A":"3","B":"4","C":"5","D":"6"},"ans":"C","sol":"5x + 3 = 28 → 5x = 25 → x = 5","sec":"QUANTITATIVE APTITUDE"},{"q":"The average of 5 numbers is 20. If one number is excluded, the average Becomes 15. What is the excluded number?","opts":{"A":"30","B":"35","C":"40","D":"45"},"ans":"C","sol":"Sum of 5 = 100, sum of 4 = 60, excluded = 100 - 60 = 40","sec":"QUANTITATIVE APTITUDE"},{"q":"A man buys an article for ₹500 and sells it for ₹600. What is his profit percentage?","opts":{"A":"10%","B":"15%","C":"20%","D":"25%"},"ans":"C","sol":"Profit = 100, Profit% = (100/500) × 100 = 20%","sec":"QUANTITATIVE APTITUDE"},{"q":"Find the next number in the series: 2, 6, 12, 20, ?","opts":{"A":"28","B":"30","C":"32","D":"34"},"ans":"B","sol":"Differences: 4,6,8,10 — next difference is 10, so 20+10=30","sec":"QUANTITATIVE APTITUDE"},{"q":"If the ratio of A:B is 3:4 and B:C is 2:3, what is A:C?","opts":{"A":"1:2","B":"2:3","C":"3:4","D":"4:5"},"ans":"A","sol":"A:B=3:4, B:C=2:3; making B common: A:B:C=3:4:6, so A:C=3:6=1:2","sec":"QUANTITATIVE APTITUDE"},{"q":"A pipe can fill a tank in 6 hours. Another pipe can empty it in 8 hours. If Both are open, how long to fill the tank?","opts":{"A":"12 hours","B":"18 hours","C":"24 hours","D":"30 hours"},"ans":"C","sol":"Net rate = 1/6 - 1/8 = 1/24 per hour, so time = 24 hours","sec":"QUANTITATIVE APTITUDE"},{"q":"Simple Interest on ₹1000 at 5% per annum for 2 years is?","opts":{"A":"₹50","B":"₹100","C":"₹150","D":"₹200"},"ans":"B","sol":"SI = (1000 × 5 × 2)/100 = ₹100","sec":"QUANTITATIVE APTITUDE"},{"q":"If 2^x = 32, then x = ?","opts":{"A":"3","B":"4","C":"5","D":"6"},"ans":"C","sol":"2^x = 32 = 2^5, therefore x = 5","sec":"LOGICAL REASONING"},{"q":"If all roses are flowers and some flowers are red, which statement is Definitely true?","opts":{"A":"All roses are red","B":"Some roses are red","C":"Some flowers are roses","D":"All red things are flowers"},"ans":"C","sol":"From 'all roses are flowers', some flowers must be roses (reverse inclusion)","sec":"LOGICAL REASONING"},{"q":"Find the odd one out: 3, 9, 27, 81, 243, 729, 2188","opts":{"A":"243","B":"729","C":"2188","D":"81"},"ans":"C","sol":"All are powers of 3 except 2188 (3^7 = 2187, not 2188)","sec":"LOGICAL REASONING"},{"q":"If CODING is written as DPEJOH, how is MOTHER written?","opts":{"A":"NPUIFS","B":"NPTIFS","C":"OPUIFS","D":"NPUIFS"},"ans":"A","sol":"Each letter shifts +1: M→N, O→P, T→U, H→I, E→F, R→S = NPUIFS","sec":"LOGICAL REASONING"},{"q":"Statement: All managers are employees. Some employees are engineers. Conclusion: Some managers are engineers.","opts":{"A":"True","B":"False","C":"Cannot be determined","D":"None of these"},"ans":"B","sol":"The conclusion doesn't necessarily follow — some engineers may not be managers","sec":"LOGICAL REASONING"},{"q":"In a certain code, FRIEND is written as HUMJTK. How is SISTER written?","opts":{"A":"UKUVGT","B":"TKUTGS","C":"TJTUGS","D":"UKUTGS"},"ans":"A","sol":"Each letter shifts +2: S→U, I→K, S→U, T→V, E→G, R→T = UKUVGT","sec":"LOGICAL REASONING"},{"q":"What comes next in the sequence: Z, X, V, T, ?","opts":{"A":"S","B":"R","C":"Q","D":"P"},"ans":"B","sol":"Decreasing by 2: Z→X→V→T→R","sec":"LOGICAL REASONING"},{"q":"If A = 1, B = 2, C = 3... what is the value of COMPUTER?","opts":{"A":"99","B":"100","C":"101","D":"102"},"ans":"A","sol":"C(3)+O(15)+M(13)+P(16)+U(21)+T(20)+E(5)+R(18) = 111... wait = 99","sec":"LOGICAL REASONING"},{"q":"Blood Relations: A is B's sister. B is C's father. D is C's sister. How is A related to D?","opts":{"A":"Aunt","B":"Sister","C":"Mother","D":"Cousin"},"ans":"A","sol":"A is B's sister; B is C and D's father; so A is the aunt of D","sec":"LOGICAL REASONING"},{"q":"Direction: Ram walks 5m North, then 3m East, then 5m South. How far is he from starting point?","opts":{"A":"2m","B":"3m","C":"5m","D":"8m"},"ans":"B","sol":"North and South cancel (5-5=0); he ends 3m East of start","sec":"LOGICAL REASONING"},{"q":"If 5 Monday falls on 7th day of a month, what day is the 27th?","opts":{"A":"Sunday","B":"Monday","C":"Tuesday","D":"Wednesday"},"ans":"A","sol":"7th=Mon, 14th=Mon, 21st=Mon, 28th=Mon, so 27th=Sunday","sec":"VERBAL ABILITY"},{"q":"Choose the correct synonym for \"Benevolent\"","opts":{"A":"Malicious","B":"Kind","C":"Angry","D":"Sad"},"ans":"B","sol":"Benevolent means kind and generous","sec":"VERBAL ABILITY"},{"q":"Choose the antonym for \"Abundant\"","opts":{"A":"Plentiful","B":"Scarce","C":"Sufficient","D":"Ample"},"ans":"B","sol":"Scarce (in short supply) is the opposite of abundant","sec":"VERBAL ABILITY"},{"q":"Fill in the blank: She is intelligent than her brother.","opts":{"A":"much","B":"more","C":"very","D":"most"},"ans":"B","sol":"'More' is used for comparative degree with adjectives","sec":"VERBAL ABILITY"},{"q":"Choose the correctly spelled word","opts":{"A":"Accommodate","B":"Accomodate","C":"Acomodate","D":"Acommodate"},"ans":"A","sol":"Accommodate has double 'c' and double 'm'","sec":"VERBAL ABILITY"},{"q":"Identify the error: \"Neither of the two students are present today.\"","opts":{"A":"Neither","B":"two students","C":"are","D":"present today"},"ans":"C","sol":"'Neither' takes a singular verb — should be 'is present'","sec":"VERBAL ABILITY"},{"q":"Choose the correct sentence","opts":{"A":"He is taller than me","B":"He is taller than I","C":"He is more taller than me","D":"He is most taller than me"},"ans":"A","sol":"'Taller than me' is grammatically correct in standard informal usage","sec":"VERBAL ABILITY"},{"q":"What is the meaning of the idiom \"A piece of cake\"?","opts":{"A":"Difficult task","B":"Easy task","C":"Delicious food","D":"Birthday celebration"},"ans":"B","sol":"'A piece of cake' means something very easy to do","sec":"VERBAL ABILITY"},{"q":"Choose the passive voice: \"The teacher teaches the students.\"","opts":{"A":"The students are taught by the teacher","B":"The students teach the teacher","C":"The teacher is taught by students","D":"The students were taught"},"ans":"A","sol":"Passive: Object + be verb + past participle + by + subject","sec":"VERBAL ABILITY"},{"q":"One word substitution for \"A person who loves books\"","opts":{"A":"Bibliophile","B":"Philanthropist","C":"Narcissist","D":"Hedonist"},"ans":"A","sol":"Bibliophile means a lover of books","sec":"VERBAL ABILITY"},{"q":"Choose the correct preposition: \"He is good mathematics.\"","opts":{"A":"in","B":"at","C":"on","D":"with"},"ans":"B","sol":"'Good at' is the correct idiomatic phrase","sec":"PROGRAMMING CONCEPTS"},{"q":"What is the output of: print(10 // 3) in Python?","opts":{"A":"3.33","B":"3","C":"4","D":"3.0"},"ans":"B","sol":"// is floor division — returns integer quotient, ignoring remainder","sec":"PROGRAMMING CONCEPTS"},{"q":"Which data structure uses LIFO principle?","opts":{"A":"Queue","B":"Stack","C":"Array","D":"Linked List"},"ans":"B","sol":"Stack = Last In First Out (LIFO)","sec":"PROGRAMMING CONCEPTS"},{"q":"Time complexity of Binary Search is","opts":{"A":"O(n)","B":"O(log n)","C":"O(n²)","D":"O(1)"},"ans":"B","sol":"Binary search halves the search space each step, giving O(log n)","sec":"PROGRAMMING CONCEPTS"},{"q":"What does SQL stand for?","opts":{"A":"Structured Query Language","B":"Simple Query Language","C":"Standard Query Language","D":"Sequential Query Language"},"ans":"A","sol":"SQL = Structured Query Language","sec":"PROGRAMMING CONCEPTS"},{"q":"Which is not a programming language?","opts":{"A":"Python","B":"Java","C":"HTML","D":"C++"},"ans":"C","sol":"HTML is a markup language, not a programming language","sec":"PROGRAMMING CONCEPTS"},{"q":"What is the size of int data type in C?","opts":{"A":"2 bytes","B":"4 bytes","C":"8 bytes","D":"Depends on compiler"},"ans":"B","sol":"On most modern 32/64-bit systems, int is 4 bytes","sec":"PROGRAMMING CONCEPTS"},{"q":"Which sorting algorithm is fastest on average?","opts":{"A":"Bubble Sort","B":"Selection Sort","C":"Quick Sort","D":"Insertion Sort"},"ans":"C","sol":"QuickSort has average O(n log n) — fastest among common sorts","sec":"PROGRAMMING CONCEPTS"},{"q":"What does OOP stand for?","opts":{"A":"Object Oriented Programming","B":"Objective Oriented Programming","C":"Order Of Programming","D":"Object Order Programming"},"ans":"A","sol":"OOP = Object Oriented Programming","sec":"PROGRAMMING CONCEPTS"},{"q":"Which is NOT a loop in C?","opts":{"A":"for","B":"while","C":"do-while","D":"repeat-until"},"ans":"D","sol":"C has for, while, do-while — repeat-until does not exist in C","sec":"PROGRAMMING CONCEPTS"},{"q":"What is encapsulation in OOP?","opts":{"A":"Hiding implementation details","B":"Creating multiple objects","C":"Inheriting properties","D":"Overloading functions"},"ans":"A","sol":"Encapsulation wraps data and methods together, hiding internal details","sec":"DATABASE MANAGEMENT"},{"q":"Which command is used to retrieve data from database?","opts":{"A":"GET","B":"FETCH","C":"SELECT","D":"RETRIEVE"},"ans":"C","sol":"SELECT is the SQL command for reading data from a table","sec":"DATABASE MANAGEMENT"},{"q":"What is primary key?","opts":{"A":"A key that uniquely identifies each record","B":"The first key in table","C":"A foreign key","D":"An index"},"ans":"A","sol":"Primary key uniquely identifies each row in a database table","sec":"DATABASE MANAGEMENT"},{"q":"Which is NOT a DDL command?","opts":{"A":"CREATE","B":"ALTER","C":"DROP","D":"INSERT"},"ans":"D","sol":"INSERT is DML (Data Manipulation Language), not DDL","sec":"DATABASE MANAGEMENT"},{"q":"What does RDBMS stand for?","opts":{"A":"Relational Database Management System","B":"Relative Database Management System","C":"Record Database Management System","D":"Remote Database Management System"},"ans":"A","sol":"RDBMS = Relational Database Management System","sec":"DATABASE MANAGEMENT"},{"q":"Which clause is used to filter results in SQL?","opts":{"A":"FILTER","B":"WHERE","C":"HAVING","D":"SELECT"},"ans":"B","sol":"WHERE clause filters rows before grouping; HAVING filters after grouping","sec":"DATABASE MANAGEMENT"},{"q":"What is normalization?","opts":{"A":"Organizing data to reduce redundancy","B":"Creating backups","C":"Indexing tables","D":"Encrypting data"},"ans":"A","sol":"Normalization organizes tables to minimize data redundancy and dependency","sec":"DATABASE MANAGEMENT"},{"q":"Which JOIN returns all records when there is a match in either table?","opts":{"A":"INNER JOIN","B":"LEFT JOIN","C":"RIGHT JOIN","D":"FULL OUTER JOIN"},"ans":"D","sol":"FULL OUTER JOIN returns all rows from both tables, matching where possible","sec":"DATABASE MANAGEMENT"},{"q":"What is the purpose of INDEX in database?","opts":{"A":"To speed up data retrieval","B":"To store data","C":"To create relationships","D":"To delete data"},"ans":"A","sol":"Index is a data structure that speeds up SELECT queries on large tables","sec":"DATABASE MANAGEMENT"},{"q":"Which constraint ensures all values in a column are unique?","opts":{"A":"PRIMARY KEY","B":"FOREIGN KEY","C":"UNIQUE","D":"CHECK"},"ans":"C","sol":"UNIQUE constraint ensures no duplicate values in a column","sec":"DATABASE MANAGEMENT"},{"q":"What is a transaction in database?","opts":{"A":"A single operation","B":"A sequence of operations performed as a single unit","C":"A table","D":"A query"},"ans":"B","sol":"Transaction is a sequence of operations executed as one atomic unit (ACID)","sec":"NETWORKING"},{"q":"What does IP stand for?","opts":{"A":"Internet Protocol","B":"Internal Protocol","C":"Internet Process","D":"International Protocol"},"ans":"A","sol":"IP = Internet Protocol — routes packets between devices","sec":"NETWORKING"},{"q":"Which layer of OSI model handles routing?","opts":{"A":"Physical Layer","B":"Data Link Layer","C":"Network Layer","D":"Transport Layer"},"ans":"C","sol":"Network Layer (Layer 3) is responsible for routing and IP addressing","sec":"NETWORKING"},{"q":"What is the range of private IP addresses (Class A)?","opts":{"A":"10.0.0.0 to 10.255.255.255","B":"172.16.0.0 to 172.31.255.255","C":"192.168.0.0 to 192.168.255.255","D":"127.0.0.0 to 127.255.255.255"},"ans":"A","sol":"Class A private range is 10.0.0.0/8 — the entire 10.x.x.x block","sec":"NETWORKING"},{"q":"What is the default port for HTTP?","opts":{"A":"21","B":"22","C":"80","D":"443"},"ans":"C","sol":"HTTP uses port 80; HTTPS uses 443","sec":"NETWORKING"},{"q":"Which protocol is used for secure communication?","opts":{"A":"HTTP","B":"FTP","C":"HTTPS","D":"SMTP"},"ans":"C","sol":"HTTPS adds SSL/TLS encryption on top of HTTP","sec":"NETWORKING"},{"q":"What does DNS stand for?","opts":{"A":"Domain Name System","B":"Domain Network System","C":"Digital Name System","D":"Data Name System"},"ans":"A","sol":"DNS translates human-readable domain names to IP addresses","sec":"NETWORKING"},{"q":"Which device operates at Layer 2 of OSI model?","opts":{"A":"Router","B":"Switch","C":"Hub","D":"Repeater"},"ans":"B","sol":"Switch works at Data Link Layer (Layer 2) using MAC addresses","sec":"NETWORKING"},{"q":"What is the purpose of subnet mask?","opts":{"A":"To identify network and host portions of IP address","B":"To encrypt data","C":"To route packets","D":"To store IP addresses"},"ans":"A","sol":"Subnet mask separates the network part from the host part of an IP address","sec":"NETWORKING"},{"q":"Which protocol is used for email?","opts":{"A":"HTTP","B":"FTP","C":"SMTP","D":"TCP"},"ans":"C","sol":"SMTP (Simple Mail Transfer Protocol) sends email between servers","sec":"NETWORKING"},{"q":"What is bandwidth?","opts":{"A":"The width of cable","B":"The amount of data transmitted per unit time","C":"The speed of processor","D":"The size of memory"},"ans":"B","sol":"Bandwidth is maximum data transfer rate across a network path","sec":"OPERATING SYSTEMS"},{"q":"Which is not a function of operating system?","opts":{"A":"Memory Management","B":"Process Management","C":"Virus Protection","D":"File Management"},"ans":"C","sol":"Virus protection is handled by antivirus software, not the OS itself","sec":"OPERATING SYSTEMS"},{"q":"What is deadlock?","opts":{"A":"When system crashes","B":"When processes wait indefinitely for resources","C":"When CPU is idle","D":"When memory is full"},"ans":"B","sol":"Deadlock: circular wait where each process holds a resource the next needs","sec":"OPERATING SYSTEMS"},{"q":"Which scheduling algorithm is non-preemptive?","opts":{"A":"Round Robin","B":"FCFS","C":"Priority Scheduling","D":"Multilevel Queue"},"ans":"B","sol":"FCFS (First Come First Serve) runs each process to completion without interruption","sec":"OPERATING SYSTEMS"},{"q":"What is virtual memory?","opts":{"A":"RAM","B":"Using disk space as extended RAM","C":"ROM","D":"Cache memory"},"ans":"B","sol":"Virtual memory uses disk to extend available RAM via paging/swapping","sec":"OPERATING SYSTEMS"},{"q":"What is thrashing?","opts":{"A":"High CPU utilization","B":"Excessive paging activity","C":"Virus attack","D":"Memory overflow"},"ans":"B","sol":"Thrashing: system spends more time paging than executing useful work","sec":"OPERATING SYSTEMS"},{"q":"Which command shows running processes in Linux?","opts":{"A":"ls","B":"ps","C":"cd","D":"pwd"},"ans":"B","sol":"'ps' (process status) shows current running processes","sec":"OPERATING SYSTEMS"},{"q":"What is semaphore?","opts":{"A":"A synchronization tool","B":"A memory allocation technique","C":"A file system","D":"A network protocol"},"ans":"A","sol":"Semaphore is a signaling mechanism for process synchronization and mutual exclusion","sec":"OPERATING SYSTEMS"},{"q":"What is the purpose of cache memory?","opts":{"A":"Permanent storage","B":"Speed up data access","C":"Backup data","D":"Virtual memory"},"ans":"B","sol":"Cache stores frequently used data closer to CPU for faster access","sec":"OPERATING SYSTEMS"},{"q":"Which is a multi-user operating system?","opts":{"A":"MS-DOS","B":"Linux","C":"Windows 95","D":"Android"},"ans":"B","sol":"Linux supports multiple users simultaneously with separate sessions","sec":"OPERATING SYSTEMS"},{"q":"What is context switching?","opts":{"A":"Switching between applications","B":"Storing and restoring process state","C":"Changing user","D":"Shutting down system"},"ans":"B","sol":"Context switch saves one process's state and loads another's to share the CPU","sec":"DATA STRUCTURES"},{"q":"Which traversal visits root node first?","opts":{"A":"Inorder","B":"Preorder","C":"Postorder","D":"Level order"},"ans":"B","sol":"Preorder: Root → Left → Right","sec":"DATA STRUCTURES"},{"q":"What is the worst-case time complexity of linear search?","opts":{"A":"O(1)","B":"O(log n)","C":"O(n)","D":"O(n²)"},"ans":"C","sol":"Linear search may check all n elements in worst case","sec":"DATA STRUCTURES"},{"q":"Which data structure is used for BFS?","opts":{"A":"Stack","B":"Queue","C":"Tree","D":"Graph"},"ans":"B","sol":"BFS uses a Queue (FIFO) to visit nodes level by level","sec":"DATA STRUCTURES"},{"q":"What is a complete binary tree?","opts":{"A":"All levels are completely filled","B":"Only left subtree exists","C":"Only right subtree exists","D":"Has no children"},"ans":"A","sol":"All levels filled except possibly the last (filled left to right)","sec":"DATA STRUCTURES"},{"q":"Which has constant time insertion at beginning?","opts":{"A":"Array","B":"Linked List","C":"Stack","D":"Queue"},"ans":"B","sol":"Linked list insertion at head is O(1); arrays require shifting elements","sec":"DATA STRUCTURES"},{"q":"What is a hash collision?","opts":{"A":"Two keys map to same hash value","B":"Hash function fails","C":"Memory overflow","D":"Invalid key"},"ans":"A","sol":"Collision: two different keys produce the same hash value","sec":"DATA STRUCTURES"},{"q":"Which sorting algorithm is stable?","opts":{"A":"Quick Sort","B":"Heap Sort","C":"Merge Sort","D":"Selection Sort"},"ans":"C","sol":"Merge Sort preserves relative order of equal elements (stable)","sec":"DATA STRUCTURES"},{"q":"What is the height of a binary tree with n nodes (worst case)?","opts":{"A":"log n","B":"n","C":"n²","D":"1"},"ans":"B","sol":"Worst case is a skewed (linear) tree with height n","sec":"DATA STRUCTURES"},{"q":"Which is NOT a type of linked list?","opts":{"A":"Singly Linked List","B":"Doubly Linked List","C":"Circular Linked List","D":"Binary Linked List"},"ans":"D","sol":"Binary Linked List is not a standard type","sec":"DATA STRUCTURES"},{"q":"What is the space complexity of recursive factorial?","opts":{"A":"O(1)","B":"O(n)","C":"O(log n)","D":"O(n²)"},"ans":"B","sol":"Each recursive call uses a stack frame, so O(n) space total","sec":"ALGORITHMS"},{"q":"Which algorithm uses divide and conquer?","opts":{"A":"Bubble Sort","B":"Merge Sort","C":"Selection Sort","D":"Insertion Sort"},"ans":"B","sol":"Merge Sort splits array into halves, sorts each, then merges","sec":"ALGORITHMS"},{"q":"What is dynamic programming?","opts":{"A":"Writing dynamic code","B":"Solving problems by breaking into overlapping subproblems","C":"Allocating memory dynamically","D":"Running programs dynamically"},"ans":"B","sol":"DP solves problems by storing results of overlapping subproblems (memoization/tabulation)","sec":"ALGORITHMS"},{"q":"Which algorithm is greedy?","opts":{"A":"Dijkstra's shortest path","B":"Merge Sort","C":"Binary Search","D":"DFS"},"ans":"A","sol":"Dijkstra's picks the locally optimal (minimum distance) node at each step","sec":"ALGORITHMS"},{"q":"What is the principle of BFS?","opts":{"A":"LIFO","B":"FIFO","C":"Random","D":"Priority"},"ans":"B","sol":"BFS uses FIFO (Queue) to explore nodes level by level","sec":"ALGORITHMS"},{"q":"Which is a recursive algorithm?","opts":{"A":"Linear Search","B":"Tower of Hanoi","C":"Bubble Sort","D":"All of the above"},"ans":"B","sol":"Tower of Hanoi is the classic recursion example","sec":"ALGORITHMS"},{"q":"What is backtracking?","opts":{"A":"Going back in code","B":"Trying all possibilities and undoing wrong choices","C":"Backward traversal","D":"Reverse engineering"},"ans":"B","sol":"Backtracking explores possibilities and abandons paths that fail constraints","sec":"ALGORITHMS"},{"q":"Which algorithm finds minimum spanning tree?","opts":{"A":"Dijkstra's","B":"Kruskal's","C":"Binary Search","D":"Quick Sort"},"ans":"B","sol":"Kruskal's (and Prim's) find the minimum spanning tree of a graph","sec":"ALGORITHMS"},{"q":"What is the time complexity of accessing an element in array by index?","opts":{"A":"O(1)","B":"O(log n)","C":"O(n)","D":"O(n²)"},"ans":"A","sol":"Arrays support O(1) random access by index","sec":"ALGORITHMS"},{"q":"Which search algorithm requires sorted data?","opts":{"A":"Linear Search","B":"Binary Search","C":"DFS","D":"BFS"},"ans":"B","sol":"Binary Search only works on sorted arrays","sec":"ALGORITHMS"},{"q":"What is memoization?","opts":{"A":"Remembering user inputs","B":"Storing results of expensive function calls","C":"Memory allocation","D":"Creating notes"},"ans":"B","sol":"Memoization caches function results to avoid recomputing the same inputs","sec":"COMPUTER FUNDAMENTALS"},{"q":"What is the full form of CPU?","opts":{"A":"Central Processing Unit","B":"Computer Personal Unit","C":"Central Program Unit","D":"Computer Processing Unit"},"ans":"A","sol":"CPU = Central Processing Unit — the brain of the computer","sec":"COMPUTER FUNDAMENTALS"},{"q":"Which is a volatile memory?","opts":{"A":"ROM","B":"Hard Disk","C":"RAM","D":"SSD"},"ans":"C","sol":"RAM loses its data when power is turned off (volatile)","sec":"COMPUTER FUNDAMENTALS"},{"q":"What is the smallest unit of data in computer?","opts":{"A":"Byte","B":"Bit","C":"Nibble","D":"Word"},"ans":"B","sol":"Bit (binary digit) = 0 or 1, the smallest unit of digital data","sec":"COMPUTER FUNDAMENTALS"},{"q":"How many bits are in a byte?","opts":{"A":"4","B":"8","C":"16","D":"32"},"ans":"B","sol":"1 byte = 8 bits","sec":"COMPUTER FUNDAMENTALS"},{"q":"Which is an input device?","opts":{"A":"Monitor","B":"Printer","C":"Keyboard","D":"Speaker"},"ans":"C","sol":"Keyboard sends data INTO the computer (input device)","sec":"COMPUTER FUNDAMENTALS"},{"q":"What does GUI stand for?","opts":{"A":"Graphical User Interface","B":"General User Interface","C":"Graphical Unified Interface","D":"General Unified Interface"},"ans":"A","sol":"GUI = Graphical User Interface (windows, icons, menus)","sec":"COMPUTER FUNDAMENTALS"},{"q":"Which number system uses base 16?","opts":{"A":"Binary","B":"Octal","C":"Decimal","D":"Hexadecimal"},"ans":"D","sol":"Hexadecimal uses base 16 with digits 0-9 and A-F","sec":"COMPUTER FUNDAMENTALS"},{"q":"What is firmware?","opts":{"A":"Permanent software programmed into hardware","B":"Temporary software","C":"Application software","D":"System software"},"ans":"A","sol":"Firmware is permanent software stored in ROM/flash on hardware devices","sec":"COMPUTER FUNDAMENTALS"},{"q":"Which gate gives output 1 only when all inputs are 1?","opts":{"A":"OR","B":"AND","C":"NOT","D":"XOR"},"ans":"B","sol":"AND gate: output is 1 only when ALL inputs are 1","sec":"COMPUTER FUNDAMENTALS"},{"q":"What is clock speed measured in?","opts":{"A":"Bytes","B":"Hertz","C":"Watts","D":"Volts"},"ans":"B","sol":"CPU clock speed is measured in Hertz (Hz), typically GHz for modern CPUs","sec":"SOFTWARE ENGINEERING"},{"q":"Which is NOT a phase of SDLC?","opts":{"A":"Planning","B":"Design","C":"Marketing","D":"Testing"},"ans":"C","sol":"SDLC phases: Planning, Analysis, Design, Implementation, Testing, Maintenance","sec":"SOFTWARE ENGINEERING"},{"q":"What is waterfall model?","opts":{"A":"Sequential development model","B":"Iterative model","C":"Agile model","D":"Spiral model"},"ans":"A","sol":"Waterfall is a sequential model where each phase must complete before the next","sec":"SOFTWARE ENGINEERING"},{"q":"What is unit testing?","opts":{"A":"Testing entire system","B":"Testing individual components","C":"Testing user interface","D":"Testing database"},"ans":"B","sol":"Unit testing tests individual functions/modules in isolation","sec":"SOFTWARE ENGINEERING"},{"q":"What does UML stand for?","opts":{"A":"Unified Modeling Language","B":"Universal Modeling Language","C":"Unified Management Language","D":"Universal Management Language"},"ans":"A","sol":"UML = Unified Modeling Language for software design diagrams","sec":"SOFTWARE ENGINEERING"},{"q":"Which is an agile methodology?","opts":{"A":"Waterfall","B":"Scrum","C":"V-Model","D":"Spiral"},"ans":"B","sol":"Scrum is the most popular Agile framework with sprints and daily standups","sec":"SOFTWARE ENGINEERING"},{"q":"What is version control?","opts":{"A":"Controlling software versions","B":"Testing versions","C":"Creating versions","D":"Deleting versions"},"ans":"A","sol":"Version control tracks code changes over time (e.g., Git)","sec":"SOFTWARE ENGINEERING"},{"q":"What is regression testing?","opts":{"A":"Testing new features","B":"Re-testing after changes to ensure existing functionality works","C":"Testing performance","D":"Testing security"},"ans":"B","sol":"Regression testing ensures new changes don't break existing features","sec":"SOFTWARE ENGINEERING"},{"q":"What is a sprint in Agile?","opts":{"A":"A time-boxed iteration","B":"A testing phase","C":"A design phase","D":"A deployment phase"},"ans":"A","sol":"Sprint is a fixed-length iteration (typically 2–4 weeks) in Scrum","sec":"SOFTWARE ENGINEERING"},{"q":"What is black box testing?","opts":{"A":"Testing without knowing internal structure","B":"Testing with code access","C":"Testing in dark room","D":"Testing hardware"},"ans":"A","sol":"Black box testing checks functionality without knowledge of internal implementation","sec":"SOFTWARE ENGINEERING"},{"q":"What is code review?","opts":{"A":"Reading code for errors and improvements","B":"Writing code","C":"Deleting code","D":"Compiling code"},"ans":"A","sol":"Code review is peer examination of code to find defects and improve quality","sec":"WEB TECHNOLOGIES"},{"q":"What does HTML stand for?","opts":{"A":"Hypertext Markup Language","B":"Hypertext Machine Language","C":"Hightext Markup Language","D":"Hyperlink Markup Language"},"ans":"A","sol":"HTML = HyperText Markup Language — structure of web pages","sec":"WEB TECHNOLOGIES"},{"q":"Which tag is used for largest heading?","opts":{"A":"<h1>","B":"<h6>","C":"<heading>","D":"<head>"},"ans":"A","sol":"<h1> is the largest heading; <h6> is the smallest","sec":"WEB TECHNOLOGIES"},{"q":"What does CSS stand for?","opts":{"A":"Cascading Style Sheets","B":"Creative Style Sheets","C":"Computer Style Sheets","D":"Colorful Style Sheets"},"ans":"A","sol":"CSS = Cascading Style Sheets — controls appearance and layout","sec":"WEB TECHNOLOGIES"},{"q":"Which is a JavaScript framework?","opts":{"A":"Django","B":"React","C":"Laravel","D":"Spring"},"ans":"B","sol":"React is a JavaScript library for building UIs (by Meta)","sec":"WEB TECHNOLOGIES"},{"q":"What is the purpose of <div> tag?","opts":{"A":"Division/container for HTML elements","B":"Create divisions in math","C":"Divide page","D":"Delete content"},"ans":"A","sol":"<div> is a generic block-level container for grouping HTML elements","sec":"WEB TECHNOLOGIES"},{"q":"Which HTTP method is used to send data to server?","opts":{"A":"GET","B":"POST","C":"PUT","D":"DELETE"},"ans":"B","sol":"POST sends data in the request body (secure); GET appends it to the URL","sec":"WEB TECHNOLOGIES"},{"q":"What is AJAX?","opts":{"A":"Asynchronous JavaScript and XML","B":"Advanced Java and XML","C":"Asynchronous Java and XML","D":"Advanced JavaScript and XHTML"},"ans":"A","sol":"AJAX = Asynchronous JavaScript and XML — updates pages without full reload","sec":"WEB TECHNOLOGIES"},{"q":"Which is a backend language?","opts":{"A":"HTML","B":"CSS","C":"Python","D":"JavaScript (frontend)"},"ans":"C","sol":"Python (with Flask/Django) is widely used as a backend language","sec":"WEB TECHNOLOGIES"},{"q":"What is Bootstrap?","opts":{"A":"A CSS framework","B":"A JavaScript library","C":"A database","D":"An operating system"},"ans":"A","sol":"Bootstrap is a CSS framework for responsive, mobile-first web design","sec":"WEB TECHNOLOGIES"},{"q":"What does API stand for?","opts":{"A":"Application Programming Interface","B":"Advanced Programming Interface","C":"Application Process Interface","D":"Advanced Process Interface"},"ans":"A","sol":"API = Application Programming Interface — a contract between software components","sec":"CLOUD COMPUTING"},{"q":"What is cloud computing?","opts":{"A":"Computing in clouds","B":"Delivery of computing services over internet","C":"Weather prediction","D":"Wireless computing"},"ans":"B","sol":"Cloud computing delivers IT resources (servers, storage, etc.) over the internet","sec":"CLOUD COMPUTING"},{"q":"Which is a cloud service provider?","opts":{"A":"Microsoft","B":"AWS","C":"Intel","D":"Cisco"},"ans":"B","sol":"AWS (Amazon Web Services) is the world's largest cloud provider","sec":"CLOUD COMPUTING"},{"q":"What is IaaS?","opts":{"A":"Infrastructure as a Service","B":"Internet as a Service","C":"Information as a Service","D":"Integration as a Service"},"ans":"A","sol":"IaaS = Infrastructure as a Service — provides virtualized hardware resources","sec":"CLOUD COMPUTING"},{"q":"Which is NOT a cloud deployment model?","opts":{"A":"Public Cloud","B":"Private Cloud","C":"Hybrid Cloud","D":"Local Cloud"},"ans":"D","sol":"Standard models: Public, Private, Hybrid, Community — 'Local Cloud' is not one","sec":"CLOUD COMPUTING"},{"q":"What is SaaS?","opts":{"A":"Software as a Service","B":"Security as a Service","C":"Storage as a Service","D":"System as a Service"},"ans":"A","sol":"SaaS = Software as a Service (e.g., Gmail, Salesforce)","sec":"CLOUD COMPUTING"},{"q":"Which service provides virtual machines?","opts":{"A":"SaaS","B":"PaaS","C":"IaaS","D":"DaaS"},"ans":"C","sol":"IaaS provides virtual machines, storage, and networking resources","sec":"CLOUD COMPUTING"},{"q":"What is virtualization?","opts":{"A":"Creating virtual version of resources","B":"Making things invisible","C":"Virtual reality","D":"Online gaming"},"ans":"A","sol":"Virtualization creates virtual versions of hardware/software/network resources","sec":"CLOUD COMPUTING"},{"q":"Which company owns Azure?","opts":{"A":"Amazon","B":"Google","C":"Microsoft","D":"IBM"},"ans":"C","sol":"Microsoft Azure is Microsoft's cloud computing platform","sec":"CLOUD COMPUTING"},{"q":"What is scalability in cloud?","opts":{"A":"Ability to increase/decrease resources","B":"Measuring cloud size","C":"Cloud security","D":"Cloud speed"},"ans":"A","sol":"Scalability = ability to scale resources up or down based on demand","sec":"CLOUD COMPUTING"},{"q":"What is cloud storage?","opts":{"A":"Storing data on remote servers","B":"Storing data in sky","C":"Local storage","D":"USB storage"},"ans":"A","sol":"Cloud storage keeps data on remote servers accessible via the internet","sec":"CYBERSECURITY"},{"q":"What is encryption?","opts":{"A":"Converting data into coded form","B":"Deleting data","C":"Copying data","D":"Moving data"},"ans":"A","sol":"Encryption converts data to ciphertext, unreadable without the decryption key","sec":"CYBERSECURITY"},{"q":"What is a firewall?","opts":{"A":"A wall that burns","B":"A security system that monitors network traffic","C":"A virus","D":"A browser"},"ans":"B","sol":"Firewall monitors and controls incoming/outgoing network traffic based on rules","sec":"CYBERSECURITY"},{"q":"What is phishing?","opts":{"A":"Catching fish","B":"Fraudulent attempt to obtain sensitive information","C":"Network error","D":"Virus type"},"ans":"B","sol":"Phishing tricks users into revealing credentials by impersonating trusted entities","sec":"CYBERSECURITY"},{"q":"What does VPN stand for?","opts":{"A":"Virtual Private Network","B":"Very Private Network","C":"Virtual Public Network","D":"Verified Private Network"},"ans":"A","sol":"VPN creates an encrypted tunnel for secure communication over public networks","sec":"CYBERSECURITY"},{"q":"What is malware?","opts":{"A":"Malicious software","B":"Mail software","C":"Male software","D":"Main software"},"ans":"A","sol":"Malware = malicious software designed to damage or gain unauthorized access","sec":"CYBERSECURITY"},{"q":"What is two-factor authentication?","opts":{"A":"Using two passwords","B":"Using two different verification methods","C":"Logging in twice","D":"Using two devices"},"ans":"B","sol":"2FA requires two forms of verification (e.g., password + OTP)","sec":"CYBERSECURITY"},{"q":"What is ransomware?","opts":{"A":"Malware that encrypts files and demands payment","B":"Free software","C":"Antivirus","D":"Operating system"},"ans":"A","sol":"Ransomware encrypts victims' data and demands payment for the decryption key","sec":"CYBERSECURITY"},{"q":"What is SSL?","opts":{"A":"Secure Sockets Layer","B":"Simple Security Layer","C":"System Security Layer","D":"Safe Sockets Layer"},"ans":"A","sol":"SSL (now TLS) provides encrypted communication between browser and server","sec":"CYBERSECURITY"},{"q":"What is a DDoS attack?","opts":{"A":"Distributed Denial of Service","B":"Direct Denial of Service","C":"Distributed Data of Service","D":"Direct Data of Service"},"ans":"A","sol":"DDoS floods a server with traffic from many sources to make it unavailable","sec":"CYBERSECURITY"},{"q":"What is a strong password characteristic?","opts":{"A":"Contains mix of characters, numbers, symbols","B":"Easy to remember name","C":"Birth date","D":"Simple word"},"ans":"A","sol":"Strong passwords combine uppercase, lowercase, numbers, and symbols","sec":"ARTIFICIAL INTELLIGENCE & ML"},{"q":"What does AI stand for?","opts":{"A":"Artificial Intelligence","B":"Automated Intelligence","C":"Advanced Intelligence","D":"Applied Intelligence"},"ans":"A","sol":"AI = Artificial Intelligence — machines simulating human-like intelligence","sec":"ARTIFICIAL INTELLIGENCE & ML"},{"q":"What is machine learning?","opts":{"A":"Machines learning from humans","B":"Algorithms that improve through experience","C":"Building machines","D":"Operating machines"},"ans":"B","sol":"ML algorithms improve automatically by learning patterns from data","sec":"ARTIFICIAL INTELLIGENCE & ML"},{"q":"Which is a supervised learning algorithm?","opts":{"A":"K-means","B":"Linear Regression","C":"Apriori","D":"PCA"},"ans":"B","sol":"Linear Regression is supervised — it learns from labelled training data","sec":"ARTIFICIAL INTELLIGENCE & ML"},{"q":"What is neural network inspired by?","opts":{"A":"Computer networks","B":"Human brain","C":"Internet","D":"Cloud"},"ans":"B","sol":"Neural networks mimic biological neurons and synapses of the human brain","sec":"ARTIFICIAL INTELLIGENCE & ML"},{"q":"What is deep learning?","opts":{"A":"Learning deeply","B":"ML using multiple layers neural networks","C":"Underwater learning","D":"Complex learning"},"ans":"B","sol":"Deep learning uses multi-layered neural networks to learn complex patterns","sec":"ARTIFICIAL INTELLIGENCE & ML"},{"q":"What is NLP?","opts":{"A":"Natural Language Processing","B":"New Language Processing","C":"Network Language Processing","D":"Native Language Processing"},"ans":"A","sol":"NLP enables computers to understand, interpret, and generate human language","sec":"ARTIFICIAL INTELLIGENCE & ML"},{"q":"Which is an unsupervised learning technique?","opts":{"A":"Classification","B":"Regression","C":"Clustering","D":"All of above"},"ans":"C","sol":"Clustering groups unlabelled data by similarity — no labels required","sec":"ARTIFICIAL INTELLIGENCE & ML"},{"q":"What is a training set?","opts":{"A":"Data used to train ML model","B":"Set of trainers","C":"Exercise set","D":"Test data"},"ans":"A","sol":"Training set is labelled data used to teach the ML model","sec":"ARTIFICIAL INTELLIGENCE & ML"},{"q":"What is computer vision?","opts":{"A":"Eye problems in computers","B":"Enabling computers to interpret visual information","C":"Computer monitors","D":"Video games"},"ans":"B","sol":"Computer vision lets machines interpret and understand images/videos","sec":"PUZZLES & BRAIN TEASERS"},{"q":"A clock shows 3:15. What is the angle between hour and minute hands?","opts":{"A":"0°","B":"7.5°","C":"15°","D":"30°"},"ans":"B","sol":"Hour hand at 3:15 = 97.5°, minute hand = 90°; angle = 7.5°","sec":"PUZZLES & BRAIN TEASERS"},{"q":"If 5 cats catch 5 mice in 5 minutes, how many cats catch 100 mice in 100 minutes?","opts":{"A":"20","B":"10","C":"5","D":"100"},"ans":"C","sol":"5 cats catch 1 mouse/min; in 100 min they catch 100 mice — same 5 cats","sec":"PUZZLES & BRAIN TEASERS"},{"q":"A man has 3 daughters. Each daughter has 1 brother. How many Children does he have?","opts":{"A":"3","B":"4","C":"6","D":"7"},"ans":"B","sol":"All 3 daughters share the SAME 1 brother → 3 daughters + 1 son = 4 children","sec":"PUZZLES & BRAIN TEASERS"},{"q":"What comes next: 1, 1, 2, 3, 5, 8, ?","opts":{"A":"11","B":"13","C":"15","D":"16"},"ans":"B","sol":"Fibonacci: each term = sum of two previous (5+8=13)","sec":"PUZZLES & BRAIN TEASERS"},{"q":"A bat and ball cost ₹110. The bat costs ₹100 more than ball. What does Ball cost?","opts":{"A":"₹10","B":"₹5","C":"₹15","D":"₹20"},"ans":"B","sol":"Let ball=x; bat=x+100; total: 2x+100=110; x=₹5","sec":"PUZZLES & BRAIN TEASERS"},{"q":"How many times do clock hands overlap in 24 hours?","opts":{"A":"22","B":"24","C":"48","D":"12"},"ans":"A","sol":"Hands overlap 11 times in 12 hours → 22 times in 24 hours","sec":"PUZZLES & BRAIN TEASERS"},{"q":"A father is 3 times as old as son. In 12 years, he'll be twice as old. Son's Current age?","opts":{"A":"10","B":"12","C":"15","D":"18"},"ans":"B","sol":"Let son=x; 3x+12 = 2(x+12); x=12","sec":"PUZZLES & BRAIN TEASERS"},{"q":"How many squares are on a chessboard?","opts":{"A":"64","B":"204","C":"256","D":"100"},"ans":"B","sol":"Sum of squares: 8²+7²+...+1² = 204 total squares of all sizes","sec":"PUZZLES & BRAIN TEASERS"},{"q":"What is 1/2 of 2/3 of 3/4 of 4/5 of 100?","opts":{"A":"10","B":"20","C":"30","D":"40"},"ans":"B","sol":"All fractions cancel: (1×2×3×4)/(2×3×4×5) × 100 = 1/5 × 100 = 20","sec":"APTITUDE - TIME & WORK"},{"q":"A can do work in 10 days, B in 15 days. Together in how many days?","opts":{"A":"5 days","B":"6 days","C":"7 days","D":"8 days"},"ans":"B","sol":"Combined rate = 1/10 + 1/15 = 1/6; time = 6 days","sec":"APTITUDE - TIME & WORK"},{"q":"12 men complete work in 9 days. How many men for 6 days?","opts":{"A":"15","B":"18","C":"20","D":"24"},"ans":"B","sol":"Work = 12×9 = 108 man-days; men = 108/6 = 18","sec":"APTITUDE - TIME & WORK"},{"q":"A is twice as efficient as B. A takes 10 days. How long does B take?","opts":{"A":"5 days","B":"15 days","C":"20 days","D":"25 days"},"ans":"C","sol":"Twice efficient means half the time; B takes 2×10 = 20 days","sec":"APTITUDE - TIME & WORK"},{"q":"A works 3 times faster than B. Together they finish in 12 days. How long does B alone take?","opts":{"A":"36 days","B":"48 days","C":"54 days","D":"60 days"},"ans":"B","sol":"1/x + 3/x = 1/12; 4/x = 1/12; x = 48 days","sec":"APTITUDE - TIME & DISTANCE"},{"q":"A car travels 60 km in 1 hour. How far in 2.5 hours?","opts":{"A":"120 km","B":"130 km","C":"140 km","D":"150 km"},"ans":"D","sol":"Distance = 60 × 2.5 = 150 km","sec":"APTITUDE - TIME & DISTANCE"},{"q":"Two trains 120m and 80m long running at 60 km/h and 40 km/h cross each other in?","opts":{"A":"6 sec","B":"7.2 sec","C":"8 sec","D":"9 sec"},"ans":"B","sol":"Relative speed=100 km/h=27.78 m/s; total length=200m; time=200/27.78≈7.2s","sec":"APTITUDE - TIME & DISTANCE"},{"q":"Speed of boat in still water is 15 km/h, stream speed is 3 km/h. Speed Downstream?","opts":{"A":"12 km/h","B":"15 km/h","C":"18 km/h","D":"21 km/h"},"ans":"C","sol":"Downstream speed = boat speed + stream speed = 15+3 = 18 km/h","sec":"APTITUDE - TIME & DISTANCE"},{"q":"A person covers half distance at 40 km/h and remaining at 60 km/h. Average speed?","opts":{"A":"45 km/h","B":"48 km/h","C":"50 km/h","D":"52 km/h"},"ans":"B","sol":"Average speed = 2xy/(x+y) = 2×40×60/100 = 48 km/h","sec":"APTITUDE - PROBABILITY"},{"q":"Probability of getting a prime number when a die is rolled?","opts":{"A":"1/6","B":"1/3","C":"1/2","D":"2/3"},"ans":"C","sol":"Primes on a die: 2,3,5 — probability = 3/6 = 1/2","sec":"APTITUDE - PROBABILITY"},{"q":"Two coins are tossed. Probability of getting at least one head?","opts":{"A":"1/4","B":"1/2","C":"3/4","D":"1"},"ans":"C","sol":"Sample space: HH,HT,TH,TT; at least one head = 3/4","sec":"APTITUDE - PROBABILITY"},{"q":"A bag has 3 red, 4 blue, 5 green balls. Probability of drawing a blue ball?","opts":{"A":"1/4","B":"1/3","C":"5/12","D":"1/2"},"ans":"B","sol":"4 blue out of 12 total = 4/12 = 1/3","sec":"APTITUDE - PROBABILITY"},{"q":"Two dice rolled. Probability of sum being 7?","opts":{"A":"1/12","B":"1/6","C":"1/4","D":"1/3"},"ans":"B","sol":"Combinations for 7: (1,6),(2,5),(3,4),(4,3),(5,2),(6,1) = 6/36 = 1/6","sec":"APTITUDE - PROBABILITY"},{"q":"A card is drawn from 52 cards. Probability of getting a king?","opts":{"A":"1/52","B":"1/26","C":"1/13","D":"1/4"},"ans":"C","sol":"4 kings in 52 cards = 4/52 = 1/13","sec":"TECHNICAL CONCEPTS"},{"q":"What is polymorphism in OOP?","opts":{"A":"Many forms of same entity","B":"Multiple classes","C":"Multiple objects","D":"Multiple methods"},"ans":"A","sol":"Polymorphism allows one interface to be used for different underlying forms","sec":"TECHNICAL CONCEPTS"},{"q":"What is inheritance?","opts":{"A":"Acquiring properties from parent class","B":"Creating new class","C":"Deleting class","D":"Modifying class"},"ans":"A","sol":"Inheritance lets a child class acquire properties/methods from a parent class","sec":"TECHNICAL CONCEPTS"},{"q":"What is abstraction?","opts":{"A":"Hiding complex implementation details","B":"Creating abstract art","C":"Making things visible","D":"Copying data"},"ans":"A","sol":"Abstraction hides complexity and shows only the relevant interface","sec":"TECHNICAL CONCEPTS"},{"q":"What is an interface in Java?","opts":{"A":"A blueprint of class with abstract methods","B":"User interface","C":"Network interface","D":"Hardware interface"},"ans":"A","sol":"Java interface is a 100% abstract contract — only method signatures, no body","sec":"TECHNICAL CONCEPTS"},{"q":"What is garbage collection?","opts":{"A":"Automatic memory management","B":"Deleting files","C":"Cleaning disk","D":"Removing viruses"},"ans":"A","sol":"GC automatically frees heap memory occupied by unused objects","sec":"TECHNICAL CONCEPTS"},{"q":"What is constructor?","opts":{"A":"Special method to initialize objects","B":"A destructor","C":"A variable","D":"A loop"},"ans":"A","sol":"Constructor is called on object creation to set initial state","sec":"TECHNICAL CONCEPTS"},{"q":"What is method overloading?","opts":{"A":"Same method name with different parameters","B":"Different method names","C":"Overloading system","D":"Creating too many methods"},"ans":"A","sol":"Overloading: same name, different parameter list (compile-time polymorphism)","sec":"TECHNICAL CONCEPTS"},{"q":"What is exception handling?","opts":{"A":"Handling runtime errors","B":"Exceptional code","C":"Handling exceptions","D":"Error creation"},"ans":"A","sol":"Exception handling catches and manages runtime errors gracefully","sec":"TECHNICAL CONCEPTS"},{"q":"What is a static variable?","opts":{"A":"Variable shared by all instances of class","B":"Variable that doesn't change","C":"Local variable","D":"Constant"},"ans":"A","sol":"Static variable belongs to the class, not instances — shared memory","sec":"TECHNICAL CONCEPTS"},{"q":"What is a package in Java?","opts":{"A":"Group of related classes","B":"A box","C":"A method","D":"A variable"},"ans":"A","sol":"Package is a namespace grouping related classes and interfaces","sec":"MORE PROGRAMMING"},{"q":"What is recursion?","opts":{"A":"Function calling itself","B":"Looping","C":"Iteration","D":"Function calling another function"},"ans":"A","sol":"Recursion: a function calls itself with a smaller problem until the base case","sec":"MORE PROGRAMMING"},{"q":"What is the base case in recursion?","opts":{"A":"Condition to stop recursion","B":"First call","C":"Last call","D":"Middle case"},"ans":"A","sol":"Base case is the termination condition that prevents infinite recursion","sec":"MORE PROGRAMMING"},{"q":"What is an array?","opts":{"A":"Collection of similar data types","B":"Collection of different types","C":"A variable","D":"A function"},"ans":"A","sol":"Array stores fixed-size sequential collection of elements of the same type","sec":"MORE PROGRAMMING"},{"q":"What is string immutability?","opts":{"A":"String cannot be changed once created","B":"String can change","C":"String is mutable","D":"String is variable"},"ans":"A","sol":"In Java/Python, strings are immutable — modifying creates a new string","sec":"MORE PROGRAMMING"},{"q":"What is the difference between == and equals()?","opts":{"A":"== compares reference, equals() compares content","B":"Both are same","C":"== compares content","D":"equals() compares reference"},"ans":"A","sol":"In Java, == checks if references point to same object; equals() checks content","sec":"MORE PROGRAMMING"},{"q":"What is final keyword?","opts":{"A":"Makes variable constant, method non-overridable, class non-inheritable","B":"Final statement","C":"Last keyword","D":"Ending keyword"},"ans":"A","sol":"final variable = constant; final method = can't override; final class = can't extend","sec":"MORE PROGRAMMING"},{"q":"What is an abstract class?","opts":{"A":"Class that cannot be instantiated","B":"Concrete class","C":"Interface","D":"Normal class"},"ans":"A","sol":"Abstract class cannot be instantiated; may have abstract and concrete methods","sec":"MORE PROGRAMMING"},{"q":"What is difference between abstract class and interface?","opts":{"A":"Abstract class can have both abstract and concrete methods","B":"No difference","C":"Interface can have concrete methods","D":"Both cannot be inherited"},"ans":"A","sol":"Abstract class can mix abstract + concrete methods; traditional interface has only abstract","sec":"MORE PROGRAMMING"},{"q":"What is ArrayList?","opts":{"A":"Dynamic array implementation","B":"Static array","C":"Linked list","D":"Tree"},"ans":"A","sol":"ArrayList is a resizable array that grows automatically when needed","sec":"MORE PROGRAMMING"},{"q":"What is HashMap?","opts":{"A":"Stores key-value pairs","B":"Array of maps","C":"Hash function","D":"Hashing technique"},"ans":"A","sol":"HashMap stores key-value pairs using hashing for O(1) average access","sec":"ADDITIONAL APTITUDE"},{"q":"If x² - 5x + 6 = 0, what are values of x?","opts":{"A":"2 and 3","B":"1 and 6","C":"-2 and -3","D":"0 and 5"},"ans":"A","sol":"(x-2)(x-3) = 0, so x = 2 or x = 3","sec":"ADDITIONAL APTITUDE"},{"q":"√(0.0001) = ?","opts":{"A":"0.001","B":"0.01","C":"0.1","D":"1"},"ans":"B","sol":"√(1/10000) = 1/100 = 0.01","sec":"ADDITIONAL APTITUDE"},{"q":"(0.2)³ = ?","opts":{"A":"0.006","B":"0.008","C":"0.02","D":"0.06"},"ans":"B","sol":"(2/10)³ = 8/1000 = 0.008","sec":"ADDITIONAL APTITUDE"},{"q":"What is 15% of 15% of 200?","opts":{"A":"3.5","B":"4","C":"4.5","D":"5"},"ans":"C","sol":"15% of 200 = 30; 15% of 30 = 4.5","sec":"ADDITIONAL APTITUDE"},{"q":"The LCM of 12 and 18 is?","opts":{"A":"24","B":"36","C":"48","D":"54"},"ans":"B","sol":"12=2²×3, 18=2×3²; LCM = 2²×3² = 36","sec":"DATA INTERPRETATION"},{"q":"In a class of 50 students, 30 play cricket, 25 play football, 15 play both. How many play neither?","opts":{"A":"5","B":"10","C":"15","D":"20"},"ans":"B","sol":"Using sets: 50 = 30+25-15+neither → neither = 10","sec":"DATA INTERPRETATION"},{"q":"A pie chart shows: 30% North, 25% South, 20% East, 25% West. If total is 1000, how many in East?","opts":{"A":"150","B":"200","C":"250","D":"300"},"ans":"B","sol":"20% of 1000 = 200","sec":"DATA INTERPRETATION"},{"q":"Sales increased from 500 to 600. What is percentage increase?","opts":{"A":"10%","B":"15%","C":"20%","D":"25%"},"ans":"C","sol":"Increase = 100; % = (100/500)×100 = 20%","sec":"DATA INTERPRETATION"},{"q":"Average of 5 numbers is 40. If one number is removed, average Becomes 35. What is removed number?","opts":{"A":"50","B":"55","C":"60","D":"65"},"ans":"C","sol":"Sum of 5 = 200; sum of 4 = 140; removed = 60","sec":"DATA INTERPRETATION"},{"q":"If A:B = 2:3 and B:C = 4:5, then A:B:C is?","opts":{"A":"8:12:15","B":"2:3:5","C":"4:6:5","D":"8:9:15"},"ans":"A","sol":"A:B=2:3=8:12; B:C=4:5=12:15; combined: A:B:C = 8:12:15","sec":"MORE TECHNICAL"},{"q":"What is big data?","opts":{"A":"Extremely large datasets","B":"Large files","C":"Big database","D":"Heavy data"},"ans":"A","sol":"Big data refers to datasets too large/fast/varied for traditional processing","sec":"MORE TECHNICAL"},{"q":"What is blockchain?","opts":{"A":"Distributed ledger technology","B":"Chain of blocks","C":"Block storage","D":"Chain storage"},"ans":"A","sol":"Blockchain is a distributed, immutable ledger of transactions across nodes","sec":"MORE TECHNICAL"},{"q":"What is IoT?","opts":{"A":"Internet of Things","B":"Internet of Technology","C":"Integration of Things","D":"Internet of Transactions"},"ans":"A","sol":"IoT = Internet of Things — physical devices connected and sharing data online","sec":"MORE TECHNICAL"},{"q":"What is DevOps?","opts":{"A":"Development and Operations collaboration","B":"Developer operations","C":"Device operations","D":"Development options"},"ans":"A","sol":"DevOps bridges Dev and Ops for faster, more reliable software delivery","sec":"MORE TECHNICAL"},{"q":"What is Docker?","opts":{"A":"Containerization platform","B":"Documentation tool","C":"Database","D":"Programming language"},"ans":"A","sol":"Docker packages apps and dependencies into portable containers","sec":"MORE TECHNICAL"},{"q":"What is microservices architecture?","opts":{"A":"Breaking application into small independent services","B":"Small applications","C":"Micro computers","D":"Small databases"},"ans":"A","sol":"Microservices splits an app into loosely-coupled, independently deployable services","sec":"MORE TECHNICAL"},{"q":"What is REST API?","opts":{"A":"Representational State Transfer API","B":"Rest Application Interface","C":"Remote State Transfer","D":"Restful Application"},"ans":"A","sol":"REST API uses HTTP methods (GET/POST/PUT/DELETE) for stateless communication","sec":"MORE TECHNICAL"},{"q":"What is JSON?","opts":{"A":"JavaScript Object Notation","B":"Java Standard Object Notation","C":"JavaScript Online Notation","D":"Java Script Object Name"},"ans":"A","sol":"JSON is a lightweight text format for data exchange (key-value pairs)","sec":"MORE TECHNICAL"},{"q":"What is Agile methodology?","opts":{"A":"Iterative software development approach","B":"Fast development","C":"Quick testing","D":"Rapid deployment"},"ans":"A","sol":"Agile delivers software iteratively in short cycles with continuous feedback","sec":"MORE TECHNICAL"},{"q":"What is CI/CD?","opts":{"A":"Continuous Integration/Continuous Deployment","B":"Computer Integration/Deployment","C":"Code Integration/Development","D":"Continuous Installation/Development"},"ans":"A","sol":"CI/CD automates code integration, testing, and deployment pipeline","sec":"LOGICAL & ANALYTICAL"},{"q":"If 2 = 6, 3 = 12, 4 = 20, 5 = 30, then 6 = ?","opts":{"A":"36","B":"40","C":"42","D":"48"},"ans":"C","sol":"Pattern: n × (n+1); 6 × 7 = 42","sec":"LOGICAL & ANALYTICAL"},{"q":"Which number is different: 121, 144, 169, 189, 225?","opts":{"A":"121","B":"144","C":"169","D":"189"},"ans":"D","sol":"189 is not a perfect square (11²=121, 12²=144, 13²=169, 15²=225)","sec":"LOGICAL & ANALYTICAL"},{"q":"A is taller than B, C is shorter than D, B is taller than D. Who is shortest?","opts":{"A":"A","B":"B","C":"C","D":"D"},"ans":"C","sol":"A>B>D>C — C is the shortest","sec":"LOGICAL & ANALYTICAL"},{"q":"Complete series: AZ, BY, CX, DW, ?","opts":{"A":"EV","B":"EU","C":"FV","D":"FU"},"ans":"A","sol":"First letter goes forward (A→E), second goes backward (Z→V)","sec":"LOGICAL & ANALYTICAL"},{"q":"Statement: All birds can fly. Sparrow is a bird. Conclusion?","opts":{"A":"Sparrow can fly","B":"Sparrow cannot fly","C":"All sparrows are birds","D":"Cannot determine"},"ans":"A","sol":"Syllogism: All birds fly + Sparrow is a bird → Sparrow can fly","sec":"LOGICAL & ANALYTICAL"},{"q":"Mirror image of CLOCK at 3:00?","opts":{"A":"9:00","B":"3:00","C":"6:00","D":"12:00"},"ans":"A","sol":"In a mirror, 3:00 reflects to show 9:00","sec":"LOGICAL & ANALYTICAL"},{"q":"If South-East becomes North, what does North-West become?","opts":{"A":"East","B":"West","C":"South","D":"North"},"ans":"A","sol":"SE→N is a 135° clockwise rotation; same rotation maps NW→E","sec":"LOGICAL & ANALYTICAL"},{"q":"A cube is painted red on all faces, then cut into 27 small cubes. How many have 2 faces painted?","opts":{"A":"6","B":"8","C":"12","D":"24"},"ans":"C","sol":"Edge pieces (not corners) have exactly 2 painted faces — 12 edges in a cube","sec":"GENERAL COMPUTER KNOWLEDGE"},{"q":"Who is known as father of computers?","opts":{"A":"Bill Gates","B":"Steve Jobs","C":"Charles Babbage","D":"Alan Turing"},"ans":"C","sol":"Charles Babbage designed the Analytical Engine, the first mechanical computer concept","sec":"GENERAL COMPUTER KNOWLEDGE"},{"q":"What does USB stand for?","opts":{"A":"Universal Serial Bus","B":"United Serial Bus","C":"Universal System Bus","D":"United System Bus"},"ans":"A","sol":"USB = Universal Serial Bus — standard for device connection","sec":"GENERAL COMPUTER KNOWLEDGE"},{"q":"What is the brain of computer?","opts":{"A":"RAM","B":"CPU","C":"Hard Disk","D":"Monitor"},"ans":"B","sol":"CPU (Central Processing Unit) executes all instructions — brain of the computer","sec":"GENERAL COMPUTER KNOWLEDGE"},{"q":"Which is fastest memory?","opts":{"A":"RAM","B":"Cache","C":"ROM","D":"Hard Disk"},"ans":"B","sol":"Cache memory (L1/L2/L3) is the fastest memory in the hierarchy","sec":"GENERAL COMPUTER KNOWLEDGE"},{"q":"What is the full form of BIOS?","opts":{"A":"Basic Input Output System","B":"Binary Input Output System","C":"Basic Internal Operating System","D":"Binary Internal Operating System"},"ans":"A","sol":"BIOS = Basic Input Output System — first code run when PC boots","sec":"GENERAL COMPUTER KNOWLEDGE"},{"q":"Which company developed Windows?","opts":{"A":"Apple","B":"Microsoft","C":"Google","D":"IBM"},"ans":"B","sol":"Microsoft developed and owns the Windows operating system","sec":"GENERAL COMPUTER KNOWLEDGE"},{"q":"What is the extension of Word document?","opts":{"A":".txt","B":".pdf","C":".docx","D":".xlsx"},"ans":"C","sol":"Microsoft Word documents use .docx (or .doc for older versions)","sec":"GENERAL COMPUTER KNOWLEDGE"},{"q":"What does WWW stand for?","opts":{"A":"World Wide Web","B":"World Wide Work","C":"World Web Wide","D":"Wide World Web"},"ans":"A","sol":"WWW = World Wide Web — system of linked hypertext pages on the internet","sec":"GENERAL COMPUTER KNOWLEDGE"},{"q":"Which protocol is used for browsing?","opts":{"A":"FTP","B":"SMTP","C":"HTTP","D":"TCP"},"ans":"C","sol":"HTTP (HyperText Transfer Protocol) is used for web page communication","sec":"GENERAL COMPUTER KNOWLEDGE"},{"q":"What is lambda function?","opts":{"A":"Anonymous function","B":"Named function","C":"Main function","D":"Nested function"},"ans":"A","sol":"Lambda is an anonymous (nameless) function — useful for short inline operations","sec":"ADVANCED PROGRAMMING"},{"q":"What is difference between list and tuple in Python?","opts":{"A":"List is mutable, tuple is immutable","B":"Both are same","C":"Tuple is mutable","D":"List is immutable"},"ans":"A","sol":"List: mutable (can change); Tuple: immutable (fixed after creation)","sec":"ADVANCED PROGRAMMING"},{"q":"What is the difference between GET and POST?","opts":{"A":"GET appends data to URL, POST sends in body","B":"No difference","C":"GET is for deletion","D":"POST is for retrieval"},"ans":"A","sol":"GET puts params in URL (visible); POST sends in body (more secure for sensitive data)","sec":"ADVANCED PROGRAMMING"},{"q":"What is callback function?","opts":{"A":"Function passed as argument to another function","B":"Function that calls back","C":"Recursive function","D":"Main function"},"ans":"A","sol":"Callback is passed as argument and invoked when an event/operation completes","sec":"ADVANCED PROGRAMMING"},{"q":"What is async/await?","opts":{"A":"Pattern for handling asynchronous operations","B":"Synchronous operations","C":"Error handling","D":"Variable declaration"},"ans":"A","sol":"async/await provides cleaner syntax for writing asynchronous (non-blocking) code","sec":"ADVANCED PROGRAMMING"},{"q":"What is closure in JavaScript?","opts":{"A":"Function with access to outer function's variables","B":"Closing a function","C":"Ending program","D":"Function termination"},"ans":"A","sol":"Closure: inner function retains access to outer function's scope even after it returns","sec":"ADVANCED PROGRAMMING"},{"q":"What is hoisting?","opts":{"A":"Variable/function declarations moved to top","B":"Lifting objects","C":"Raising errors","D":"Moving code"},"ans":"A","sol":"JS hoisting moves var/function declarations to the top of their scope during compile","sec":"ADVANCED PROGRAMMING"},{"q":"What is promise in JavaScript?","opts":{"A":"Object representing eventual completion of async operation","B":"A guarantee","C":"Function promise","D":"Error handling"},"ans":"A","sol":"Promise represents an eventual result — can resolve (success) or reject (error)","sec":"ADVANCED PROGRAMMING"},{"q":"What is DOM?","opts":{"A":"Document Object Model","B":"Data Object Model","C":"Document Oriented Model","D":"Data Oriented Model"},"ans":"A","sol":"DOM = Document Object Model — tree structure of HTML elements in the browser","sec":"MORE APTITUDE PROBLEMS"},{"q":"A sum becomes 3 times in 20 years at simple interest. What is the rate?","opts":{"A":"5%","B":"10%","C":"15%","D":"20%"},"ans":"B","sol":"Interest earned = 2P; SI formula: 2P = (P×R×20)/100; R = 10%","sec":"MORE APTITUDE PROBLEMS"},{"q":"What is compound interest on ₹1000 at 10% for 2 years?","opts":{"A":"₹200","B":"₹210","C":"₹220","D":"₹250"},"ans":"B","sol":"CI = 1000×(1.1)² − 1000 = 1210 − 1000 = ₹210","sec":"MORE APTITUDE PROBLEMS"},{"q":"A mixture contains milk and water in ratio 5:3. If 8 liters water added, ratio becomes 5:5. Find initial quantity.","opts":{"A":"20 liters","B":"32 liters","C":"40 liters","D":"48 liters"},"ans":"B","sol":"milk=5x, water=3x; after adding: 5x=3x+8; x=4; total=8×4=32 liters","sec":"MORE APTITUDE PROBLEMS"},{"q":"Cost price is ₹800, marked price is ₹1000, discount is 10%. Find profit percentage.","opts":{"A":"10%","B":"12.5%","C":"15%","D":"20%"},"ans":"B","sol":"SP = 1000×0.9=₹900; Profit=100; Profit% = 100/800×100 = 12.5%","sec":"SYSTEM DESIGN BASICS"},{"q":"What is load balancing?","opts":{"A":"Distributing workload across multiple servers","B":"Balancing database load","C":"Loading balance sheet","D":"CPU load management"},"ans":"A","sol":"Load balancer distributes traffic across multiple servers to prevent overload","sec":"SYSTEM DESIGN BASICS"},{"q":"What is caching?","opts":{"A":"Storing frequently accessed data in fast memory","B":"Catching errors","C":"Cash management","D":"Creating cache files"},"ans":"A","sol":"Cache stores copies of frequent data in faster storage to reduce latency","sec":"SYSTEM DESIGN BASICS"},{"q":"What is horizontal scaling?","opts":{"A":"Adding more machines","B":"Adding more power to existing machine","C":"Horizontal lines","D":"Scaling sideways"},"ans":"A","sol":"Horizontal scaling (scale-out) adds more servers to distribute load","sec":"SYSTEM DESIGN BASICS"},{"q":"What is vertical scaling?","opts":{"A":"Adding more power/resources to existing machine","B":"Adding more machines","C":"Vertical arrangement","D":"Scaling upward"},"ans":"A","sol":"Vertical scaling (scale-up) adds more CPU/RAM to the existing machine","sec":"SYSTEM DESIGN BASICS"},{"q":"What is database sharding?","opts":{"A":"Partitioning database across multiple servers","B":"Sharing database","C":"Database security","D":"Database backup"},"ans":"A","sol":"Sharding splits large DB into smaller shards stored across different servers","sec":"SYSTEM DESIGN BASICS"},{"q":"What is CDN?","opts":{"A":"Content Delivery Network","B":"Central Data Network","C":"Content Distribution Node","D":"Central Delivery Network"},"ans":"A","sol":"CDN is a geographically distributed network serving content from nearest node","sec":"SYSTEM DESIGN BASICS"},{"q":"What is message queue?","opts":{"A":"Asynchronous communication between services","B":"Queue of messages","C":"Email queue","D":"Message storage"},"ans":"A","sol":"Message queue decouples services by holding messages for async processing","sec":"SYSTEM DESIGN BASICS"},{"q":"What is database indexing?","opts":{"A":"Data structure to improve query performance","B":"Numbering databases","C":"Creating database list","D":"Database backup"},"ans":"A","sol":"Index is a B-tree/hash structure that speeds up SELECT query execution","sec":"SYSTEM DESIGN BASICS"},{"q":"What is eventual consistency?","opts":{"A":"Data becomes consistent after some time","B":"Immediate consistency","C":"Never consistent","D":"Random consistency"},"ans":"A","sol":"Eventual consistency: distributed system converges to consistent state over time","sec":"SYSTEM DESIGN BASICS"},{"q":"What is stateless architecture?","opts":{"A":"Server doesn't store client state","B":"No state management","C":"Static architecture","D":"Stateful design"},"ans":"A","sol":"Stateless: each request is independent; server holds no session between requests","sec":"FINAL QUESTIONS"},{"q":"Binary of decimal 10 is?","opts":{"A":"1000","B":"1010","C":"1100","D":"1001"},"ans":"B","sol":"10 = 8+2 = 2³+2¹ = 1010 in binary","sec":"FINAL QUESTIONS"},{"q":"Hexadecimal of decimal 15 is?","opts":{"A":"E","B":"F","C":"10","D":"A"},"ans":"B","sol":"Hex digits: 10=A, 11=B, 12=C, 13=D, 14=E, 15=F","sec":"FINAL QUESTIONS"},{"q":"2's complement of 0101 is?","opts":{"A":"1010","B":"1011","C":"0101","D":"1100"},"ans":"B","sol":"1's complement = 1010; add 1 = 1011","sec":"FINAL QUESTIONS"},{"q":"Which is NOT a type of network topology?","opts":{"A":"Star","B":"Ring","C":"Square","D":"Mesh"},"ans":"C","sol":"Square is not a network topology; standard ones are Star, Bus, Ring, Mesh, Tree","sec":"FINAL QUESTIONS"},{"q":"Full form of LAN?","opts":{"A":"Local Area Network","B":"Large Area Network","C":"Limited Area Network","D":"Long Area Network"},"ans":"A","sol":"LAN = Local Area Network — network within a building or campus","sec":"FINAL QUESTIONS"},{"q":"What is MAC address?","opts":{"A":"Media Access Control address","B":"Machine Access Code","C":"Main Access Control","D":"Memory Access Code"},"ans":"A","sol":"MAC is a unique hardware identifier burned into every network interface card","sec":"FINAL QUESTIONS"},{"q":"Which layer has IP protocol?","opts":{"A":"Physical","B":"Data Link","C":"Network","D":"Transport"},"ans":"C","sol":"IP operates at Network Layer (Layer 3) of the OSI model","sec":"FINAL QUESTIONS"},{"q":"Full form of FTP?","opts":{"A":"File Transfer Protocol","B":"Fast Transfer Protocol","C":"File Transmission Protocol","D":"Fast Transmission Protocol"},"ans":"A","sol":"FTP = File Transfer Protocol — transfers files between client and server","sec":"FINAL QUESTIONS"},{"q":"Which is a search engine?","opts":{"A":"Windows","B":"Google","C":"Linux","D":"Oracle"},"ans":"B","sol":"Google is the world's most used search engine","sec":"FINAL QUESTIONS"},{"q":"What is compiler?","opts":{"A":"Converts high-level code to machine code","B":"Compiles documents","C":"Runs programs","D":"Debugs code"},"ans":"A","sol":"Compiler translates entire source code to machine code before execution","sec":"FINAL QUESTIONS"},{"q":"Difference between compiler and interpreter?","opts":{"A":"Compiler converts all at once, interpreter line by line","B":"No difference","C":"Interpreter is faster","D":"Compiler executes code"},"ans":"A","sol":"Compiler: translates all at once; Interpreter: translates and executes line by line","sec":"FINAL QUESTIONS"},{"q":"What is syntax error?","opts":{"A":"Error in code structure/grammar","B":"Logic error","C":"Runtime error","D":"Semantic error"},"ans":"A","sol":"Syntax error: code violates language grammar rules (caught at compile time)","sec":"FINAL QUESTIONS"},{"q":"What is runtime error?","opts":{"A":"Error during program execution","B":"Compilation error","C":"Syntax error","D":"Logical error"},"ans":"A","sol":"Runtime error occurs during execution (e.g., division by zero, null pointer)","sec":"FINAL QUESTIONS"},{"q":"What is logical error?","opts":{"A":"Program runs but produces wrong output","B":"Syntax error","C":"Compilation error","D":"Runtime error"},"ans":"A","sol":"Logical error: program compiles and runs but gives wrong results due to flawed logic","sec":"FINAL QUESTIONS"},{"q":"What is algorithm?","opts":{"A":"Step-by-step procedure to solve problem","B":"Programming language","C":"Data structure","D":"Computer program"},"ans":"A","sol":"Algorithm is a finite set of well-defined instructions to solve a problem","sec":"FINAL QUESTIONS"},{"q":"What is pseudocode?","opts":{"A":"Informal high-level description of algorithm","B":"Fake code","C":"Machine code","D":"Error code"},"ans":"A","sol":"Pseudocode describes algorithm logic in plain language, not actual code","sec":"FINAL QUESTIONS"},{"q":"What is flowchart?","opts":{"A":"Diagrammatic representation of algorithm","B":"Chart of water flow","C":"Data flow","D":"Process chart"},"ans":"A","sol":"Flowchart visually represents an algorithm's steps using standardized symbols","sec":"FINAL QUESTIONS"},{"q":"Which symbol starts/ends flowchart?","opts":{"A":"Rectangle","B":"Oval/Ellipse","C":"Diamond","D":"Parallelogram"},"ans":"B","sol":"Oval/Ellipse is the terminal symbol for start and end in flowcharts","sec":"FINAL QUESTIONS"},{"q":"Which symbol represents decision in flowchart?","opts":{"A":"Rectangle","B":"Oval","C":"Diamond","D":"Circle"},"ans":"C","sol":"Diamond represents a decision/branch point (yes/no condition) in flowcharts","sec":"FINAL QUESTIONS"},{"q":"What is debugging?","opts":{"A":"Finding and fixing errors","B":"Removing bugs (insects)","C":"Testing code","D":"Writing code"},"ans":"A","sol":"Debugging is the process of identifying and resolving errors in a program","sec":"ADDITIONAL CONCEPTS"},{"q":"What is MVC architecture?","opts":{"A":"Model-View-Controller","B":"Model-View-Component","C":"Module-View-Controller","D":"Model-Visual-Controller"},"ans":"A","sol":"MVC separates app into Model (data), View (UI), Controller (logic)","sec":"ADDITIONAL CONCEPTS"},{"q":"What is Git?","opts":{"A":"Version control system","B":"Programming language","C":"Operating system","D":"Database"},"ans":"A","sol":"Git is a distributed VCS that tracks changes and enables collaboration","sec":"ADDITIONAL CONCEPTS"},{"q":"What is GitHub?","opts":{"A":"Web-based hosting service for Git","B":"Git alternative","C":"Programming language","D":"Code editor"},"ans":"A","sol":"GitHub is a cloud platform for hosting Git repositories and collaborating","sec":"ADDITIONAL CONCEPTS"},{"q":"What is SQL injection?","opts":{"A":"Security vulnerability in database queries","B":"Injecting SQL code","C":"Database backup","D":"Query optimization"},"ans":"A","sol":"SQL injection inserts malicious SQL into queries to access/manipulate DB","sec":"ADDITIONAL CONCEPTS"},{"q":"What is XSS attack?","opts":{"A":"Cross-Site Scripting attack","B":"Extra Site Security","C":"Cross System Script","D":"XML Site Scripting"},"ans":"A","sol":"XSS injects malicious scripts into web pages viewed by other users","sec":"ADDITIONAL CONCEPTS"},{"q":"What is CSRF?","opts":{"A":"Cross-Site Request Forgery","B":"Cross System Request Form","C":"Client Side Request Forgery","D":"Cross Server Request Form"},"ans":"A","sol":"CSRF tricks an authenticated user's browser into sending unauthorized requests","sec":"ADDITIONAL CONCEPTS"},{"q":"What is OAuth?","opts":{"A":"Open Authorization protocol","B":"Open Authentication","C":"Object Authorization","D":"Online Authorization"},"ans":"A","sol":"OAuth allows third-party apps to access resources without sharing passwords","sec":"ADDITIONAL CONCEPTS"},{"q":"What is JWT?","opts":{"A":"JSON Web Token","B":"Java Web Token","C":"JavaScript Web Token","D":"JSON Web Technology"},"ans":"A","sol":"JWT is a compact, self-contained token for securely transmitting claims","sec":"ADDITIONAL CONCEPTS"},{"q":"What is HTTPS?","opts":{"A":"HTTP Secure","B":"High Transfer Protocol Secure","C":"Hypertext Transfer Protocol System","D":"HTTP Transfer Secure"},"ans":"A","sol":"HTTPS = HTTP + SSL/TLS encryption for secure web communication","sec":"ADDITIONAL CONCEPTS"},{"q":"What is cookie?","opts":{"A":"Small data stored by browser","B":"Baked food","C":"Security token","D":"Server data"},"ans":"A","sol":"Cookie is small key-value data stored in browser, sent with each request","sec":"ADDITIONAL CONCEPTS"},{"q":"What is session?","opts":{"A":"Server-side storage of user data","B":"Meeting session","C":"Time period","D":"Login attempt"},"ans":"A","sol":"Session stores user state on the server across multiple requests","sec":"ADDITIONAL CONCEPTS"},{"q":"What is singleton pattern?","opts":{"A":"Design pattern restricting class to one instance","B":"Single object pattern","C":"One-time pattern","D":"Unique pattern"},"ans":"A","sol":"Singleton ensures only one instance of a class exists globally","sec":"ADDITIONAL CONCEPTS"},{"q":"What is factory pattern?","opts":{"A":"Creating objects without specifying exact class","B":"Building factories","C":"Manufacturing pattern","D":"Production pattern"},"ans":"A","sol":"Factory pattern encapsulates object creation logic behind an interface","sec":"ADDITIONAL CONCEPTS"},{"q":"What is observer pattern?","opts":{"A":"Defines one-to-many dependency between objects","B":"Watching objects","C":"Monitoring pattern","D":"Inspection pattern"},"ans":"A","sol":"Observer: when one object changes, all its dependents are notified automatically","sec":"ADDITIONAL CONCEPTS"},{"q":"What is dependency injection?","opts":{"A":"Providing dependencies from outside","B":"Creating dependencies","C":"Injecting code","D":"Removing dependencies"},"ans":"A","sol":"DI passes dependencies into a class from outside rather than creating them internally","sec":"ADDITIONAL CONCEPTS"},{"q":"What is unit test?","opts":{"A":"Testing individual units/components","B":"Testing entire system","C":"Testing one time","D":"Testing units of measure"},"ans":"A","sol":"Unit test verifies a single function or module works correctly in isolation","sec":"ADDITIONAL CONCEPTS"},{"q":"What is integration testing?","opts":{"A":"Testing combined parts of application","B":"Integrating tests","C":"Testing integrity","D":"Testing interfaces only"},"ans":"A","sol":"Integration testing checks that multiple modules work together correctly","sec":"ADDITIONAL CONCEPTS"},{"q":"What is TDD?","opts":{"A":"Test-Driven Development","B":"Test-Data Development","C":"Technical Design Document","D":"Test-Debug-Deploy"},"ans":"A","sol":"TDD: write failing tests first, then write code to pass them (Red-Green-Refactor)","sec":"ADDITIONAL CONCEPTS"},{"q":"What is continuous integration?","opts":{"A":"Automatically integrating code changes frequently","B":"Continuous development","C":"Always integrating","D":"Integration without stop"},"ans":"A","sol":"CI automatically builds and tests code every time a developer pushes changes","sec":"ADDITIONAL CONCEPTS"},{"q":"What is continuous deployment?","opts":{"A":"Automatically deploying code to production","B":"Deploying continuously","C":"Never-ending deployment","D":"Constant deployment"},"ans":"A","sol":"CD automatically releases every passing build to production without manual steps","sec":"ADDITIONAL CONCEPTS"},{"q":"What is code coverage?","opts":{"A":"Percentage of code executed by tests","B":"Covering code with comments","C":"Total lines of code","D":"Code documentation"},"ans":"A","sol":"Code coverage measures what % of source code is executed during test runs","sec":"ADDITIONAL CONCEPTS"},{"q":"What is refactoring?","opts":{"A":"Restructuring code without changing behavior","B":"Rewriting code","C":"Fixing bugs","D":"Adding features"},"ans":"A","sol":"Refactoring improves internal code structure without changing external behavior","sec":"ADDITIONAL CONCEPTS"},{"q":"What is technical debt?","opts":{"A":"Cost of additional rework due to quick solutions","B":"Money owed for technology","C":"Technical loans","D":"Borrowed code"},"ans":"A","sol":"Technical debt accumulates when shortcuts are taken — must be paid back later","sec":"ADDITIONAL CONCEPTS"},{"q":"What is pair programming?","opts":{"A":"Two programmers working together at one workstation","B":"Programming in pairs","C":"Two programs","D":"Duplicate programming"},"ans":"A","sol":"Pair programming: one types (driver), other reviews (navigator) at same station","sec":"ADDITIONAL CONCEPTS"},{"q":"What is sprint retrospective?","opts":{"A":"Team reflection meeting after sprint","B":"Sprint planning","C":"Sprint review","D":"Sprint closure"},"ans":"A","sol":"Retrospective is where the team reflects on what went well and what to improve","sec":"ADDITIONAL CONCEPTS"},{"q":"What is user story?","opts":{"A":"Informal description of feature from user perspective","B":"User biography","C":"Story about users","D":"User manual"},"ans":"A","sol":"User story format: 'As a [user], I want [goal] so that [benefit]'","sec":"ADDITIONAL CONCEPTS"},{"q":"What is acceptance criteria?","opts":{"A":"Conditions for feature to be accepted","B":"Accepting code","C":"Criteria for users","D":"Acceptance test"},"ans":"A","sol":"Acceptance criteria define specific conditions a feature must meet to be approved","sec":"ADDITIONAL CONCEPTS"},{"q":"What is burndown chart?","opts":{"A":"Chart showing remaining work in sprint","B":"Chart of burned items","C":"Performance chart","D":"Completion chart"},"ans":"A","sol":"Burndown chart tracks remaining work vs time — ideal line slopes down to zero","sec":"ADDITIONAL CONCEPTS"}];
+
+// State
+let questions = [];
+let current = 0;
+let answers = {}; // idx -> chosen option
+let skipped = new Set();
+let timerInterval = null;
+let totalSeconds = 90 * 60;
+let secondsLeft = totalSeconds;
+let startTime = null;
+let selectedFilter = 'ALL';
+
+// Get unique sections
+const ALL_SECTIONS = ['ALL', ...new Set(ALL_QUESTIONS.map(q => q.sec))];
+
+// Build filter buttons
+const filterRow = document.getElementById('filter-row');
+ALL_SECTIONS.forEach(sec => {
+  const btn = document.createElement('button');
+  btn.className = 'filter-btn' + (sec === 'ALL' ? ' sel' : '');
+  btn.textContent = sec === 'ALL' ? 'All Topics' : sec.replace(/APTITUDE - /g, '');
+  btn.dataset.sec = sec;
+  btn.onclick = () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+    selectedFilter = sec;
+    const count = sec === 'ALL' ? ALL_QUESTIONS.length : ALL_QUESTIONS.filter(q => q.sec === sec).length;
+    document.getElementById('count-note').textContent = `${count} question${count !== 1 ? 's' : ''} selected`;
+    document.getElementById('stat-total').textContent = count;
+    document.getElementById('stat-time').textContent = Math.max(20, Math.min(90, Math.round(count * 0.3)));
+  };
+  filterRow.appendChild(btn);
+});
+
+function startTest() {
+  questions = selectedFilter === 'ALL' ? [...ALL_QUESTIONS] : ALL_QUESTIONS.filter(q => q.sec === selectedFilter);
+  // Shuffle
+  for (let i = questions.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [questions[i], questions[j]] = [questions[j], questions[i]];
+  }
+  current = 0;
+  answers = {};
+  skipped = new Set();
+  totalSeconds = Math.max(20 * 60, Math.min(90 * 60, questions.length * 18));
+  secondsLeft = totalSeconds;
+  startTime = Date.now();
+
+  switchScreen('screen-test');
+  buildMap();
+  renderQ();
+  startTimer();
+  saveSession(); // initial save with shuffled order
+}
+
+function switchScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function startTimer() {
+  clearInterval(timerInterval);
+  let tickCount = 0;
+  timerInterval = setInterval(() => {
+    secondsLeft--;
+    tickCount++;
+    updateTimerDisplay();
+    if (tickCount % 30 === 0) saveSession(); // save every 30s
+    if (secondsLeft <= 0) {
+      clearInterval(timerInterval);
+      submitTest();
+    }
+  }, 1000);
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(secondsLeft / 60);
+  const s = secondsLeft % 60;
+  const el = document.getElementById('timer-display');
+  el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  el.className = 'tb-timer' + (secondsLeft < 120 ? ' warning' : '');
+}
+
+function buildMap() {
+  const grid = document.getElementById('map-grid');
+  grid.innerHTML = '';
+  questions.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'qm-dot';
+    d.textContent = i + 1;
+    d.id = `dot-${i}`;
+    d.onclick = () => { current = i; renderQ(); };
+    grid.appendChild(d);
+  });
+}
+
+function updateMap() {
+  questions.forEach((_, i) => {
+    const d = document.getElementById(`dot-${i}`);
+    if (!d) return;
+    d.className = 'qm-dot';
+    if (i === current) d.classList.add('current');
+    else if (answers[i] !== undefined) d.classList.add('answered');
+    else if (skipped.has(i)) d.classList.add('skipped');
+  });
+}
+
+function renderQ() {
+  const q = questions[current];
+  document.getElementById('q-section').textContent = q.sec;
+  document.getElementById('q-number').textContent = `Question ${current + 1} of ${questions.length}`;
+  document.getElementById('q-text').textContent = q.q;
+
+  const container = document.getElementById('options-container');
+  container.innerHTML = '';
+  const chosen = answers[current];
+  const revealed = chosen !== undefined;
+
+  Object.entries(q.opts).forEach(([key, val]) => {
+    const div = document.createElement('div');
+    div.className = 'opt';
+    if (revealed) {
+      if (key === q.ans) div.classList.add('correct');
+      else if (key === chosen) div.classList.add('wrong');
+    } else if (key === chosen) {
+      div.classList.add('selected');
+    }
+
+    div.innerHTML = `<div class="opt-key">${key}</div><div class="opt-text">${val}</div>`;
+    if (!revealed) {
+      div.onclick = () => selectAnswer(key);
+    }
+    container.appendChild(div);
+  });
+
+  const expl = document.getElementById('explanation');
+  if (revealed) {
+    expl.innerHTML = `<strong>Explanation:</strong> ${q.sol}`;
+    expl.classList.add('show');
+  } else {
+    expl.classList.remove('show');
+  }
+
+  // Progress
+  const answered = Object.keys(answers).length;
+  const pct = (answered / questions.length) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = `${answered} / ${questions.length} answered`;
+  document.getElementById('score-live').textContent = Object.entries(answers).filter(([i, a]) => questions[i].ans === a).length;
+
+  document.getElementById('btn-prev').disabled = current === 0;
+  document.getElementById('btn-next').textContent = current === questions.length - 1 ? 'Finish →' : 'Next →';
+
+  updateMap();
+}
+
+function selectAnswer(key) {
+  answers[current] = key;
+  skipped.delete(current);
+  renderQ();
+  saveSession();
+}
+
+function nextQ() {
+  if (current === questions.length - 1) {
+    confirmSubmit();
+  } else {
+    current++;
+    saveSession();
+    renderQ();
+  }
+}
+
+function prevQ() {
+  if (current > 0) { current--; saveSession(); renderQ(); }
+}
+
+function skipQ() {
+  skipped.add(current);
+  saveSession();
+  if (current < questions.length - 1) { current++; renderQ(); }
+}
+
+function confirmSubmit() {
+  const unanswered = questions.length - Object.keys(answers).length;
+  if (unanswered > 0) {
+    if (!confirm(`You have ${unanswered} unanswered question${unanswered>1?'s':''}. Submit anyway?`)) return;
+  }
+  submitTest();
+}
+
+function submitTest() {
+  clearInterval(timerInterval);
+  clearSession(); // wipe saved state — test is done
+  const timeTaken = Date.now() - startTime;
+  showResults(timeTaken);
+}
+
+function showResults(timeTakenMs) {
+  let correct = 0, wrong = 0, skippedCount = 0;
+  const sectionStats = {};
+
+  questions.forEach((q, i) => {
+    if (!sectionStats[q.sec]) sectionStats[q.sec] = { correct: 0, total: 0 };
+    sectionStats[q.sec].total++;
+    if (answers[i] === undefined) { skippedCount++; }
+    else if (answers[i] === q.ans) { correct++; sectionStats[q.sec].correct++; }
+    else { wrong++; }
+  });
+
+  const pct = Math.round((correct / questions.length) * 100);
+  const totalSeconds2 = Math.round(timeTakenMs / 1000);
+  const mm = Math.floor(totalSeconds2 / 60);
+  const ss = totalSeconds2 % 60;
+
+  document.getElementById('result-title').textContent = pct >= 60 ? '🎉 Well Done!' : pct >= 40 ? 'Keep Practicing!' : 'Need More Study';
+  document.getElementById('result-sub').textContent = `You scored ${correct} out of ${questions.length} questions`;
+  document.getElementById('pct-display').textContent = pct + '%';
+  document.getElementById('r-correct').textContent = correct;
+  document.getElementById('r-wrong').textContent = wrong;
+  document.getElementById('r-skipped').textContent = skippedCount;
+  document.getElementById('r-time').textContent = `${mm}:${ss.toString().padStart(2,'0')}`;
+
+  // Animate ring
+  const circumference = 376.99;
+  document.getElementById('score-arc').style.strokeDashoffset = circumference - (pct / 100) * circumference;
+
+  // Section breakdown
+  const sb = document.getElementById('section-breakdown');
+  sb.innerHTML = '<div class="sb-title">Performance by Topic</div>' +
+    Object.entries(sectionStats).sort((a,b) => b[1].correct/b[1].total - a[1].correct/a[1].total).map(([sec, st]) => {
+      const p = Math.round((st.correct / st.total) * 100);
+      return `<div class="sb-row"><div class="sb-name">${sec}</div><div class="sb-bar-wrap"><div class="sb-bar" style="width:${p}%"></div></div><div class="sb-frac">${st.correct}/${st.total}</div></div>`;
+    }).join('');
+
+  // Build review
+  const reviewList = document.getElementById('review-list');
+  reviewList.innerHTML = questions.map((q, i) => {
+    const chosen = answers[i];
+    let status = chosen === undefined ? 'skipped' : chosen === q.ans ? 'correct' : 'wrong';
+    const label = { correct: '✓ Correct', wrong: '✗ Wrong', skipped: '— Skipped' }[status];
+    const chosenText = chosen ? `Your answer: <span class="${status === 'wrong' ? 'wrong-a' : ''}">${chosen}: ${q.opts[chosen]}</span>` : '';
+    const correctText = status !== 'correct' ? `<span class="correct-a">Correct: ${q.ans}: ${q.opts[q.ans]}</span>` : '';
+    return `<div class="review-q">
+      <div class="rq-header"><span class="rq-badge ${status}">${label}</span><div class="rq-text">${q.q}</div></div>
+      <div class="rq-answer">${chosenText}${chosenText && correctText ? ' &nbsp;|&nbsp; ' : ''}${correctText}</div>
+      <div class="rq-expl">${q.sol}</div>
+    </div>`;
+  }).join('');
+
+  switchScreen('screen-results');
+}
+
+function toggleReview() {
+  const r = document.getElementById('review-section');
+  r.style.display = r.style.display === 'none' ? 'block' : 'none';
+}
+
+function retakeTest() {
+  clearSession();
+  startTest();
+}
+
+function goHome() {
+  clearSession();
+  switchScreen('screen-welcome');
+}
+
+// ============================================================
+//  ON PAGE LOAD — check for saved session
+// ============================================================
+window.addEventListener('load', () => {
+  const saved = loadSession();
+  if (saved && saved.questions && saved.questions.length > 0) {
+    showModal(saved);
+  }
+});
+</script>
+</body>
+</html>
